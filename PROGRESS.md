@@ -71,9 +71,10 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 
 ---
 
-## M02 – Label Engine
+## M02 – Label Engine 🔄 IN PROGRESS
 
-**Branch:** `feat/m02-label-engine`
+**Branch:** `feat/m02-label-engine`  
+**Status:** Active – all tasks implemented, awaiting human review
 
 ### Context for the Agent
 
@@ -97,8 +98,8 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 - [x] Implement barrier evaluation for short setups
 - [x] Implement the ambiguity policies (conservative default, optimistic, exclude)
 - [x] Produce and store the rich outcome metadata
-- [ ] Generate the label quality report and imbalance warning
-- [ ] Write exhaustive unit tests covering all required edge cases
+- [x] Generate the label quality report and imbalance warning
+- [x] Write exhaustive unit tests covering all required edge cases
 
 ### Human Review Checklist
 
