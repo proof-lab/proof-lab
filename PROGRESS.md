@@ -62,12 +62,12 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 
 ### Human Review Checklist
 
-- [ ] Validator rejects all classes of bad data listed in the requirements
-- [ ] Cleaning never introduces future information
-- [ ] Datasets are immutable once versioned
-- [ ] Health report contains every required field
-- [ ] Timestamps are timezone-aware and stored in UTC
-- [ ] No feature, label or model logic has been introduced
+- [x] Validator rejects all classes of bad data listed in the requirements
+- [x] Cleaning never introduces future information
+- [x] Datasets are immutable once versioned
+- [x] Health report contains every required field
+- [x] Timestamps are timezone-aware and stored in UTC
+- [x] No feature, label or model logic has been introduced
 
 ---
 
