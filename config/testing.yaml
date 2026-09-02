@@ -1,0 +1,9 @@
+﻿# Testing environment overrides
+env: testing
+
+log:
+  level: WARNING
+  format: text
+
+db:
+  url: "duckdb:///:memory:"
