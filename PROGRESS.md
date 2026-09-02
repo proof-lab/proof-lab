@@ -71,4 +71,45 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 
 ---
 
+## M02 – Label Engine
+
+**Branch:** `feat/m02-label-engine`
+
+### Context for the Agent
+
+Proof Lab’s core modelling idea is Predictive Setup Classification. The system does not forecast the next price. It estimates the probability that a predefined target will be reached before a predefined stop within a fixed horizon of bars.
+
+For a long setup: entry = current price, target = entry + target_distance, stop = entry – stop_distance.  
+For a short setup the inequalities are reversed. Distances must be configurable in pips, points, percentage or ATR multiples (pips and points are the initial priority).
+
+The canonical classes are 1 = BUY, –1 = SELL, 0 = IGNORE. Internally the system must also preserve richer outcomes: TARGET_FIRST, STOP_FIRST, TIMEOUT, AMBIGUOUS.
+
+Barrier evaluation starts at the entry timestamp, inspects future bars, and stops when the target is hit, the stop is hit, or the horizon expires. When both target and stop fall inside the same OHLC bar, an explicit ambiguity policy decides the outcome. Supported policies are: conservative (assume adverse barrier first – this is the default), optimistic, exclude, and (later) tick resolution. The chosen policy must be recorded in the experiment configuration.
+
+After label generation a quality report is required: total samples, counts and percentages for BUY/SELL/IGNORE and for the richer outcomes, plus a warning if the class distribution is severely imbalanced. Labels must be fully deterministic given the same data and configuration.
+
+Required test cases include target-first, stop-first, timeout, same-bar ambiguity, long and short setups, zero target, invalid stop, and insufficient future data.
+
+### Tasks
+
+- [ ] Define the Setup configuration object (target, stop, horizon, direction, ambiguity policy)
+- [ ] Implement barrier evaluation for long setups
+- [ ] Implement barrier evaluation for short setups
+- [ ] Implement the ambiguity policies (conservative default, optimistic, exclude)
+- [ ] Produce and store the rich outcome metadata
+- [ ] Generate the label quality report and imbalance warning
+- [ ] Write exhaustive unit tests covering all required edge cases
+
+### Human Review Checklist
+
+- [ ] Labels are fully deterministic
+- [ ] Conservative policy is the default
+- [ ] Ambiguous bars are handled exactly as configured
+- [ ] Rich metadata is preserved alongside the canonical classes
+- [ ] Quality report matches the required content
+- [ ] All critical test cases pass
+- [ ] No feature or model code has been added
+
+---
+
 _End of current work._
