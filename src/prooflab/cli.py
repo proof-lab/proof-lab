@@ -10,7 +10,6 @@ Usage::
 from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
-from typing import Optional
 
 import typer
 
@@ -50,7 +49,7 @@ def _version_callback(value: bool) -> None:  # noqa: FBT001
 
 @app.callback()
 def _root(
-    _version: Optional[bool] = typer.Option(  # noqa: UP007
+    _version: bool | None = typer.Option(  # noqa: UP007
         None,
         "--version",
         "-v",

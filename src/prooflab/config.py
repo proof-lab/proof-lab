@@ -1,4 +1,4 @@
-﻿"""Configuration system for Proof Lab.
+"""Configuration system for Proof Lab.
 
 Loading order (later wins):
   1. config/default.yaml
@@ -22,13 +22,12 @@ from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
 
-# Repo root is three levels above this file:  src/prooflab/config.py -> src/prooflab -> src -> root
+# Repo root: src/prooflab/config.py -> src/prooflab -> src -> root
 _REPO_ROOT: Path = Path(__file__).resolve().parent.parent.parent
 _CONFIG_DIR: Path = _REPO_ROOT / "config"
 
@@ -38,7 +37,6 @@ _CONFIG_DIR: Path = _REPO_ROOT / "config"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
-    """Load a YAML file and return its contents as a plain dict."""
     if not path.exists():
         return {}
     with path.open(encoding="utf-8") as fh:
@@ -46,7 +44,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
-    """Recursively merge *override* into *base*, returning a new dict."""
     result: dict[str, Any] = dict(base)
     for key, value in override.items():
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
@@ -56,7 +53,7 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
     return result
 
 
-def _load_merged_yaml() -> dict[str, Any]:
+def load_merged_yaml() -> dict[str, Any]:
     """Merge default.yaml with the environment-specific YAML overlay."""
     env_name = os.getenv("PROOFLAB_ENV", "development")
     base = _load_yaml(_CONFIG_DIR / "default.yaml")
@@ -64,8 +61,34 @@ def _load_merged_yaml() -> dict[str, Any]:
     return _deep_merge(base, overlay)
 
 
+def _apply_env_overrides(data: dict[str, Any]) -> dict[str, Any]:
+    """Apply PROOFLAB_* environment variables on top of YAML data.
+
+    Supports single-level nesting via the __ delimiter:
+      PROOFLAB_LOG__LEVEL=DEBUG  ->  data["log"]["level"] = "DEBUG"
+      PROOFLAB_LIVE_TRADING_ENABLED=true -> data["live_trading_enabled"] = "true"
+    """
+    prefix = "PROOFLAB_"
+    result: dict[str, Any] = _deep_merge(data, {})  # copy
+    for key, value in os.environ.items():
+        if not key.startswith(prefix):
+            continue
+        stripped = key[len(prefix):]
+        if "__" in stripped:
+            outer, inner = stripped.split("__", 1)
+            outer_k = outer.lower()
+            inner_k = inner.lower()
+            if outer_k not in result:
+                result[outer_k] = {}
+            if isinstance(result[outer_k], dict):
+                result[outer_k][inner_k] = value
+        else:
+            result[stripped.lower()] = value
+    return result
+
+
 # ---------------------------------------------------------------------------
-# Nested settings models
+# Nested config models (plain Pydantic BaseModel, no BaseSettings)
 # ---------------------------------------------------------------------------
 
 
@@ -95,23 +118,17 @@ class DbSettings(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class ProofLabSettings(BaseSettings):
+class ProofLabSettings(BaseModel):
     """Root configuration object for Proof Lab.
 
-    Sources (in ascending priority):
-      YAML files (via ``get_settings()``) -> environment variables.
+    Sources (in ascending priority): YAML files -> environment variables.
 
-    Environment variables use the prefix ``PROOFLAB_`` and the delimiter
-    ``__`` for nested keys, e.g. ``PROOFLAB_LOG__LEVEL=DEBUG``.
+    Environment variables use the prefix `PROOFLAB_` and the delimiter
+    `__` for nested keys, e.g.::
+
+        PROOFLAB_LOG__LEVEL=DEBUG
+        PROOFLAB_LIVE_TRADING_ENABLED=true   # will be rejected by the validator
     """
-
-    model_config = SettingsConfigDict(
-        env_prefix="PROOFLAB_",
-        env_nested_delimiter="__",
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
 
     env: str = "development"
     log: LogSettings = LogSettings()
@@ -125,10 +142,10 @@ class ProofLabSettings(BaseSettings):
         """Reject any attempt to enable live trading through configuration.
 
         Live trading requires an explicit programmatic gate that sits outside
-        the configuration system.  This validator is the last line of defence
-        against accidental activation via a config file or environment variable.
+        the configuration system.
         """
-        if str(value).strip().lower() in ("true", "1", "yes"):
+        truthy = str(value).strip().lower() in ("true", "1", "yes")
+        if truthy:
             raise ValueError(
                 "live_trading_enabled cannot be set to True via configuration. "
                 "Use the explicit live-trading gate."
@@ -141,12 +158,17 @@ class ProofLabSettings(BaseSettings):
 # ---------------------------------------------------------------------------
 
 
+def _build_settings() -> ProofLabSettings:
+    yaml_data = load_merged_yaml()
+    merged = _apply_env_overrides(yaml_data)
+    return ProofLabSettings.model_validate(merged)
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> ProofLabSettings:
     """Return the singleton ProofLabSettings instance.
 
     The result is cached after the first call.  In tests, call
-    ``get_settings.cache_clear()`` between cases to force a fresh load.
+    `get_settings.cache_clear()` between cases to force a fresh load.
     """
-    yaml_data = _load_merged_yaml()
-    return ProofLabSettings(**yaml_data)
+    return _build_settings()

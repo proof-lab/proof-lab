@@ -1,4 +1,4 @@
-﻿"""Structured logging for Proof Lab.
+"""Structured logging for Proof Lab.
 
 Usage::
 
@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -64,7 +64,7 @@ class _JsonFormatter(logging.Formatter):
             message = f"{message}\n{self.formatException(record.exc_info)}"
 
         payload: dict[str, object] = {
-            "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(record.created, tz=UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": message,
@@ -100,7 +100,7 @@ def configure_logging(settings: ProofLabSettings) -> None:
         handler.setFormatter(_JsonFormatter())
     else:
         try:
-            from rich.logging import RichHandler  # type: ignore[import-untyped]
+            from rich.logging import RichHandler
 
             handler = RichHandler(rich_tracebacks=True, show_path=False)
         except ImportError:  # pragma: no cover
