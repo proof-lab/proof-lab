@@ -92,7 +92,7 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 
 ### Tasks
 
-- [ ] Define the Setup configuration object (target, stop, horizon, direction, ambiguity policy)
+- [x] Define the Setup configuration object (target, stop, horizon, direction, ambiguity policy)
 - [ ] Implement barrier evaluation for long setups
 - [ ] Implement barrier evaluation for short setups
 - [ ] Implement the ambiguity policies (conservative default, optimistic, exclude)
