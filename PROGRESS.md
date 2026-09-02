@@ -93,10 +93,10 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 ### Tasks
 
 - [x] Define the Setup configuration object (target, stop, horizon, direction, ambiguity policy)
-- [ ] Implement barrier evaluation for long setups
-- [ ] Implement barrier evaluation for short setups
-- [ ] Implement the ambiguity policies (conservative default, optimistic, exclude)
-- [ ] Produce and store the rich outcome metadata
+- [x] Implement barrier evaluation for long setups
+- [x] Implement barrier evaluation for short setups
+- [x] Implement the ambiguity policies (conservative default, optimistic, exclude)
+- [x] Produce and store the rich outcome metadata
 - [ ] Generate the label quality report and imbalance warning
 - [ ] Write exhaustive unit tests covering all required edge cases
 
