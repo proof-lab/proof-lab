@@ -24,11 +24,11 @@ This file only holds the milestones themselves.
 
 #### Human Review Checklist
 
-- [ ] `pip install -e .` succeeds
-- [ ] Configuration loads from YAML and environment variables
-- [ ] Logging produces the expected structured output
-- [ ] CLI responds correctly
-- [ ] Layout matches the required structure
-- [ ] No trading, labeling, feature or model logic has been introduced
+- [x] `pip install -e .` succeeds
+- [x] Configuration loads from YAML and environment variables
+- [x] Logging produces the expected structured output
+- [x] CLI responds correctly
+- [x] Layout matches the required structure
+- [x] No trading, labeling, feature or model logic has been introduced
 
 _End of current work._
