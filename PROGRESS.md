@@ -7,11 +7,28 @@ Before starting any work, the agent must have read `AGENTS.md`.
 All permanent rules (branching strategy, commit format, how to mark tasks, what the agent may and may not do) live in `AGENTS.md`.  
 This file only holds the milestones themselves.
 
----
+## M00 – Foundation 🔄 IN PROGRESS
 
-## Milestones
+**Branch:** `feat/m00-foundation`  
+**Status:** Active – all tasks implemented, awaiting human review
 
----
+#### Tasks
 
-**End of current work.**  
-When a milestone is complete and approved, leave it in place and paste the next one underneath.
+- [x] Create the full repository structure shown above
+- [x] Write `pyproject.toml` with all core dependencies and tool configuration (ruff, mypy, pytest, coverage)
+- [x] Implement the configuration system (YAML files + pydantic settings + environment variable overrides). All future strategy parameters must be configuration-driven and versioned with experiments
+- [x] Implement structured logging (human-readable in development, machine-readable JSON in production) with levels DEBUG, INFO, WARNING, ERROR, CRITICAL
+- [x] Create a minimal deterministic CLI entry point (`prooflab --help`, `prooflab --version`)
+- [x] Add a basic CI workflow that runs lint, type-check and unit tests
+- [x] Add `README.md`, `LICENSE` and `.env.example` (secrets must never be stored in Git)
+
+#### Human Review Checklist
+
+- [x] `pip install -e .` succeeds
+- [x] Configuration loads from YAML and environment variables
+- [x] Logging produces the expected structured output
+- [x] CLI responds correctly
+- [x] Layout matches the required structure
+- [x] No trading, labeling, feature or model logic has been introduced
+
+_End of current work._
