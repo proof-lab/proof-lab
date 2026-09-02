@@ -69,3 +69,6 @@ artifacts/reports/
 # DuckDB
 *.duckdb
 *.duckdb.wal
+
+# Trash
+trash/
