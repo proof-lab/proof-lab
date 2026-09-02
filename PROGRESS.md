@@ -55,7 +55,7 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 - [x] Implement Parquet storage helpers and DuckDB access layer
 - [x] Implement dataset versioning with id, checksum and full metadata
 - [x] Build the data validator that detects all required problem classes
-- [ ] Generate the complete health report for every dataset
+- [x] Generate the complete health report for every dataset
 - [ ] Implement the cleaning pipeline (no silent forward-fill)
 - [ ] Write unit tests using deliberately dirty synthetic data that exercise every validation rule
 
