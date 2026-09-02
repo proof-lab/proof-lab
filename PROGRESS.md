@@ -33,9 +33,10 @@ This file only holds the milestones themselves.
 
 ---
 
-## M01 – Data Engine
+## M01 – Data Engine 🔄 IN PROGRESS
 
-**Branch:** `feat/m01-data-engine`
+**Branch:** `feat/m01-data-engine`  
+**Status:** Active – all tasks implemented, awaiting human review
 
 ### Context for the Agent
 
@@ -57,7 +58,7 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 - [x] Build the data validator that detects all required problem classes
 - [x] Generate the complete health report for every dataset
 - [x] Implement the cleaning pipeline (no silent forward-fill)
-- [ ] Write unit tests using deliberately dirty synthetic data that exercise every validation rule
+- [x] Write unit tests using deliberately dirty synthetic data that exercise every validation rule
 
 ### Human Review Checklist
 
