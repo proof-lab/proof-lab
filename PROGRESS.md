@@ -31,4 +31,43 @@ This file only holds the milestones themselves.
 - [x] Layout matches the required structure
 - [x] No trading, labeling, feature or model logic has been introduced
 
+---
+
+## M01 – Data Engine
+
+**Branch:** `feat/m01-data-engine`
+
+### Context for the Agent
+
+Proof Lab begins with data. Before any labels, features or models can exist, the system must ingest historical market data, prove it is clean, and store it in an immutable versioned form.
+
+Supported data includes OHLC, OHLCV, bid/ask, spread, tick data and volume. The baseline is historical MT5 data. Every bar should contain: timestamp, symbol, timeframe, open, high, low, close, volume, tick_volume, spread, source. Optional tick schema: timestamp, symbol, bid, ask, last, volume.
+
+All timestamps must be timezone-aware, stored internally in UTC, and must never be silently converted without recording the transformation. The data validator must detect duplicate timestamps, missing timestamps, impossible OHLC relationships, negative prices or volume, invalid spreads, timestamp disorder, extreme unexplained gaps and corrupted rows. Every dataset must produce a health report containing row counts, missing/duplicate/invalid rows, time span, symbols, timeframes, missing intervals, median and maximum spread, and completeness.
+
+Cleaning must not introduce future information. Allowed operations are duplicate removal, malformed-row removal, timestamp sorting and explicit missing-data handling. The system must not automatically forward-fill price data across market closures unless explicitly configured. Any imputation must be recorded.
+
+Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_time, created_at, checksum, row_count, feature_version. If raw data changes, a new dataset version is created. Existing experiments continue to reference the original version. Large analytical datasets should use Parquet; DuckDB should query Parquet directly where practical.
+
+### Tasks
+
+- [ ] Define the canonical OHLCV schema and optional tick schema (pydantic or equivalent)
+- [ ] Implement Parquet storage helpers and DuckDB access layer
+- [ ] Implement dataset versioning with id, checksum and full metadata
+- [ ] Build the data validator that detects all required problem classes
+- [ ] Generate the complete health report for every dataset
+- [ ] Implement the cleaning pipeline (no silent forward-fill)
+- [ ] Write unit tests using deliberately dirty synthetic data that exercise every validation rule
+
+### Human Review Checklist
+
+- [ ] Validator rejects all classes of bad data listed in the requirements
+- [ ] Cleaning never introduces future information
+- [ ] Datasets are immutable once versioned
+- [ ] Health report contains every required field
+- [ ] Timestamps are timezone-aware and stored in UTC
+- [ ] No feature, label or model logic has been introduced
+
+---
+
 _End of current work._
