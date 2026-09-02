@@ -53,7 +53,7 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 
 - [x] Define the canonical OHLCV schema and optional tick schema (pydantic or equivalent)
 - [x] Implement Parquet storage helpers and DuckDB access layer
-- [ ] Implement dataset versioning with id, checksum and full metadata
+- [x] Implement dataset versioning with id, checksum and full metadata
 - [ ] Build the data validator that detects all required problem classes
 - [ ] Generate the complete health report for every dataset
 - [ ] Implement the cleaning pipeline (no silent forward-fill)
