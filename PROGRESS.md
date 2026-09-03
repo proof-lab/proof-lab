@@ -192,7 +192,7 @@ A minimal training pipeline skeleton should execute: Load Dataset â†’ Validate â
 - [x] Implement the XGBoost model with the required configurability
 - [x] Implement the configurable PyTorch neural network with validation-only early stopping
 - [ ] Implement the SVM with probability estimates and training-fitted scaling
-- [ ] Implement artifact saving and loading that captures all required components
+- [x] Implement artifact saving and loading that captures all required components
 - [ ] Create the minimal training pipeline skeleton that respects chronological order and preprocessor rules
 
 ### Human Review Checklist
