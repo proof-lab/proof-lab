@@ -87,3 +87,25 @@ def test_consumer_duplicate_and_out_of_order() -> None:
     ok_ooo, issues_ooo = consumer.process_tick(tick_old, wall_clock_utc=t1)
     assert ok_ooo is False
     assert DataQualityIssue.OUT_OF_ORDER_TIMESTAMP in issues_ooo
+
+
+def test_consumer_gap_and_empty_history() -> None:
+    consumer = MarketDataConsumer(
+        ConsumerConfig(max_price_gap_pips=10.0, max_time_gap_seconds=300.0)
+    )
+    t0 = datetime(2026, 3, 2, 10, 0, 0, tzinfo=UTC)
+    t1 = datetime(2026, 3, 2, 10, 10, 0, tzinfo=UTC)  # 600s gap > 300s
+
+    tick0 = LiveTick(symbol="EURUSD", timestamp_utc=t0, bid=1.1000, ask=1.1001)
+    consumer.process_tick(tick0, wall_clock_utc=t0)
+
+    # Large price gap + time gap
+    tick_gap = LiveTick(symbol="EURUSD", timestamp_utc=t1, bid=1.1050, ask=1.1051)  # 50 pips gap
+    ok, issues = consumer.process_tick(tick_gap, wall_clock_utc=t1)
+    assert ok is False
+    assert DataQualityIssue.PRICE_GAP_EXCESSIVE in issues
+    assert DataQualityIssue.TIMESTAMP_GAP_EXCESSIVE in issues
+
+    # Empty symbol dataframe
+    df_empty = consumer.get_bars_dataframe("UNKNOWN")
+    assert df_empty.empty

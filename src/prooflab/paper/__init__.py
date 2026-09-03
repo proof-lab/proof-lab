@@ -7,6 +7,10 @@ from prooflab.paper.consumer import (
     LiveTick,
     MarketDataConsumer,
 )
+from prooflab.paper.engine import (
+    PaperBarEventResult,
+    PaperTradingEngine,
+)
 from prooflab.paper.execution import (
     PaperExecutionConfig,
     PaperExecutionEngine,
@@ -23,19 +27,31 @@ from prooflab.paper.inference import (
 from prooflab.paper.ledger import (
     PaperTradeLedger,
 )
+from prooflab.paper.lifecycle import (
+    ALLOWED_TRANSITIONS,
+    LifecycleTransitionEvent,
+    StrategyLifecycleManager,
+    StrategyLifecycleState,
+)
 
 __all__ = [
+    "ALLOWED_TRANSITIONS",
     "ConsumerConfig",
     "DataQualityIssue",
     "InferencePrediction",
+    "LifecycleTransitionEvent",
     "LiveBar",
     "LiveFeatureCalculator",
     "LiveFeatureResult",
     "LiveInferenceEngine",
     "LiveTick",
     "MarketDataConsumer",
+    "PaperBarEventResult",
     "PaperExecutionConfig",
     "PaperExecutionEngine",
     "PaperPosition",
     "PaperTradeLedger",
+    "PaperTradingEngine",
+    "StrategyLifecycleManager",
+    "StrategyLifecycleState",
 ]

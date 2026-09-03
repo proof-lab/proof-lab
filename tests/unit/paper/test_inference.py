@@ -100,3 +100,43 @@ def test_live_inference_unfitted_model_rejection() -> None:
     unfitted_artifact = _make_dummy_artifact(is_fitted=False)
     with pytest.raises(ValueError, match="Artifact model is not fitted"):
         LiveInferenceEngine(artifact=unfitted_artifact)
+
+
+def test_live_inference_series_and_dataframe_inputs() -> None:
+    artifact = _make_dummy_artifact(is_fitted=True)
+    engine = LiveInferenceEngine(artifact=artifact, min_confidence_threshold=0.50)
+
+    # Series
+    s = pd.Series({"feat_a": 1.5, "feat_b": 0.25})
+    pred_s = engine.predict_live(s)
+    assert pred_s.is_valid is True
+
+    # DataFrame
+    df = pd.DataFrame([{"feat_a": 1.5, "feat_b": 0.25}])
+    pred_df = engine.predict_live(df)
+    assert pred_df.is_valid is True
+
+    # Series missing feature
+    s_bad = pd.Series({"feat_a": 1.5})
+    pred_s_bad = engine.predict_live(s_bad)
+    assert pred_s_bad.is_valid is False
+
+    # DataFrame missing feature
+    df_bad = pd.DataFrame([{"feat_a": 1.5}])
+    pred_df_bad = engine.predict_live(df_bad)
+    assert pred_df_bad.is_valid is False
+
+    # Unsupported type
+    pred_bad_type = engine.predict_live([1.5, 0.25])  # type: ignore[arg-type]
+    assert pred_bad_type.is_valid is False
+    assert "Unsupported features container" in str(pred_bad_type.rejection_reason)
+
+
+def test_live_inference_unloaded_and_missing_file() -> None:
+    empty_engine = LiveInferenceEngine()
+    pred = empty_engine.predict_live({"feat_a": 1.0})
+    assert pred.is_valid is False
+    assert "No model artifact loaded" in str(pred.rejection_reason)
+
+    with pytest.raises(FileNotFoundError, match="Model artifact file not found"):
+        LiveInferenceEngine.from_file("nonexistent_model.plmodel")
