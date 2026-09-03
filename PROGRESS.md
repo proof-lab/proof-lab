@@ -315,4 +315,54 @@ The system must track the number of experiments performed and warn when many exp
 
 ---
 
+## M07 – Backtesting Engine 🔄 IN PROGRESS
+
+**Branch:** `feat/m07-backtesting-engine`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+The backtesting engine is independent of model training. Its architecture is:
+
+Model → Predictions → Signal Engine → Backtester → Execution Simulator → Portfolio → Metrics
+
+The backtester must never modify the predictions it receives. A prediction becomes a trade only when it satisfies configured conditions (prediction direction, minimum calibrated probability, risk checks, regime filter, news blackout, etc.).
+
+Position sizing is risk-based: risk_amount = account_equity × risk_per_trade; position_size = risk_amount / stop_loss_value. Position size must respect broker limits.
+
+The execution cost model must support spread, commission, slippage, swap and execution delay. Spread modelling supports historical spread, fixed spread, spread multiplier and stress spread, with Normal / Conservative / Stress scenarios. Slippage is configurable (initially fixed pips). Commission may be per lot, per unit, per transaction or percentage. Swap is modelled when trades can remain open across financing periods.
+
+Each simulated order must contain: order_id, timestamp, symbol, side, requested_price, fill_price, quantity, stop, target, spread, commission, slippage, status, exit_reason.
+
+Required metrics:
+
+- Returns: Total return, Annualized return, CAGR
+- Risk: Maximum drawdown, Average drawdown, Drawdown duration, Volatility, VaR, CVaR
+- Risk-adjusted: Sharpe, Sortino, Calmar
+- Trading: Trade count, Win rate, Loss rate, Average win/loss, Profit factor, Expectancy, Average holding time
+- Costs: Total spread, commission, slippage, swap, total execution costs
+
+The equity curve is generated from the actual simulated account balance and must support gross equity, net equity and drawdown.
+
+### Tasks
+
+- [ ] Implement the signal engine that turns predictions into trade decisions under the configured filters
+- [ ] Implement the full order lifecycle
+- [ ] Implement spread modelling (historical, fixed, multiplier, stress)
+- [ ] Implement commission, slippage and swap cost models
+- [ ] Implement portfolio accounting and the equity curve
+- [ ] Calculate the complete metrics suite listed above
+- [ ] Write tests covering entry, exit, stop, target, costs, partial fills and lifecycle edge cases
+
+### Human Review Checklist
+
+- [ ] Backtester never alters incoming predictions
+- [ ] All cost components are independently inspectable
+- [ ] Equity curve is derived from simulated balance
+- [ ] All required metrics are present and correct
+- [ ] Position sizing respects broker limits
+- [ ] Core lifecycle and cost tests pass
+
+---
+
 _End of current work._
