@@ -113,10 +113,10 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 
 ---
 
-## M03 – Feature Engine 🔄 IN PROGRESS
+## M03 – Feature Engine ✅ COMPLETE
 
 **Branch:** `feat/m03-feature-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 ### Context for the Agent
 
@@ -163,9 +163,10 @@ The same feature implementations will later be reused for live inference; there 
 
 ---
 
-## M04 – Model Engine
+## M04 – Model Engine 🔄 IN PROGRESS
 
-**Branch:** `feat/m04-model-engine`
+**Branch:** `feat/m04-model-engine`  
+**Status:** Active – agent is working here
 
 ### Context for the Agent
 
