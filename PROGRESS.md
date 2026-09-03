@@ -258,7 +258,7 @@ M05 keeps separate long and short ensembles, continuing the M04 one-model-per-co
 ### Tasks
 
 - [x] Implement hard voting
-- [ ] Implement probability averaging
+- [x] Implement probability averaging
 - [ ] Implement weighted probability averaging
 - [ ] Implement Platt scaling calibration
 - [ ] Implement isotonic regression calibration
