@@ -217,4 +217,60 @@ All M04 tasks are committed and ready for human review.
 
 ---
 
+## M05 – Ensemble & Calibration
+
+**Branch:** `feat/m05-ensemble-calibration`
+
+### Context for the Agent
+
+Individual models are available. They must now be combined and their outputs turned into well-calibrated probabilities.
+
+The ensemble must support hard voting (required for compatibility) as well as probability averaging and weighted probability averaging; stacking may be added later. The application must not assume hard voting is inherently superior.
+
+Raw probabilities must be optionally calibrated with Platt scaling or isotonic regression. Calibration is fitted only on training/validation data; the blind test set remains untouched. Calibration quality should be measured with Brier score, log loss, calibration curve and expected calibration error.
+
+“Confidence” is defined strictly as the calibrated probability of the predicted class. It must never be merely the number of models that agree. Model agreement may be displayed separately.
+
+Every prediction must conform to this schema:
+
+```json
+{
+  "timestamp": "...",
+  "symbol": "EURUSD",
+  "prediction": "BUY",
+  "probabilities": {
+    "BUY": 0.72,
+    "SELL": 0.08,
+    "IGNORE": 0.2
+  },
+  "model_votes": {
+    "xgboost": "BUY",
+    "neural_network": "BUY",
+    "svm": "IGNORE"
+  }
+}
+```
+
+### Tasks
+
+- [ ] Implement hard voting
+- [ ] Implement probability averaging
+- [ ] Implement weighted probability averaging
+- [ ] Implement Platt scaling calibration
+- [ ] Implement isotonic regression calibration
+- [ ] Produce the exact ensemble prediction schema shown above
+- [ ] Ensure confidence is the calibrated probability of the predicted class
+- [ ] Write tests for all combination and calibration methods
+
+### Human Review Checklist
+
+- [ ] Calibration is fitted only on train/validation data
+- [ ] Blind test set is never used for calibration
+- [ ] Output schema matches the specification exactly
+- [ ] Confidence is never just vote count
+- [ ] Model votes remain available separately
+- [ ] Methods are selectable via configuration
+
+---
+
 _End of current work._
