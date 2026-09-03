@@ -113,4 +113,53 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 
 ---
 
+## M03 – Feature Engine
+
+**Branch:** `feat/m03-feature-engine`
+
+### Context for the Agent
+
+Once labels exist, the system needs quantitative features that describe market state at each point in time without ever looking into the future.
+
+Features are organised into families:
+
+- **Price**: return_1/2/3/6/12/24, range_1/3/6/12, body_size, upper_wick, lower_wick, distance_from_high/low, close_to_open/high/low
+- **Momentum**: RSI, ROC, MACD, MACD_signal, MACD_histogram, momentum_3/6/12
+- **Volatility**: ATR, ATR_percent, rolling_std, rolling_range, true_range, volatility_percentile
+- **Trend**: EMA_fast/slow, EMA_distance, SMA_fast/slow, ADX, trend_slope (all parameters configurable)
+- **Time**: cyclical encoding – hour_sin/cos = sin/cos(2π · hour / 24), dow_sin/cos = sin/cos(2π · day / 7)
+- **Microstructure** (only when the required data exists, never faked from OHLCV): bid_ask_spread, spread_percentile, tick_count, tick_rate, short-term volatility/range, price acceleration, tick_volume_change
+
+Every feature must carry metadata: feature_name, family, description, parameters, required_columns, lookback_period, uses_future_data, version. Every feature generator must declare its maximum lookback. The framework should reject suspicious future dependencies.
+
+A feature is valid at time t only if all required information was available at t. Scaling and other preprocessing statistics must be fitted only on training data and then applied to validation and test data; they must never be fitted on the entire dataset. Warm-up rows (where the lookback is not yet satisfied) must be handled correctly.
+
+The system must support experiment modes that compare feature families: Price only, Price+Volatility, Price+Momentum, Price+Volatility+Momentum, All Standard Features, All Standard + Microstructure.
+
+The same feature implementations will later be reused for live inference; there must be only one code path.
+
+### Tasks
+
+- [ ] Create the feature metadata system and registry
+- [ ] Implement the price feature family
+- [ ] Implement the momentum feature family
+- [ ] Implement the volatility feature family
+- [ ] Implement the trend feature family
+- [ ] Implement cyclical time features
+- [ ] Build the feature pipeline with explicit lookback declarations and leakage guards
+- [ ] Handle warm-up rows and enforce fit/transform separation for any scalers
+- [ ] Write unit and property tests that prove absence of look-ahead bias for every family
+
+### Human Review Checklist
+
+- [ ] Every feature declares its maximum lookback
+- [ ] No feature can access future data
+- [ ] Scalers are fitted only on training data
+- [ ] Metadata is complete for every feature
+- [ ] Core families required by the MVP are present
+- [ ] Tests demonstrate no leakage
+- [ ] Microstructure features are not fabricated from OHLCV alone
+
+---
+
 _End of current work._
