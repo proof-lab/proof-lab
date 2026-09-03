@@ -315,10 +315,10 @@ The system must track the number of experiments performed and warn when many exp
 
 ---
 
-## M07 – Backtesting Engine 🔄 IN PROGRESS
+## M07 – Backtesting Engine ✅ COMPLETE
 
 **Branch:** `feat/m07-backtesting-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -354,16 +354,14 @@ The equity curve is generated from the actual simulated account balance and must
 - [x] Calculate the complete metrics suite listed above
 - [x] Write tests covering entry, exit, stop, target, costs, partial fills and lifecycle edge cases
 
-All M07 tasks are committed and ready for human review.
-
 ### Human Review Checklist
 
-- [ ] Backtester never alters incoming predictions
-- [ ] All cost components are independently inspectable
-- [ ] Equity curve is derived from simulated balance
-- [ ] All required metrics are present and correct
-- [ ] Position sizing respects broker limits
-- [ ] Core lifecycle and cost tests pass
+- [x] Backtester never alters incoming predictions
+- [x] All cost components are independently inspectable
+- [x] Equity curve is derived from simulated balance
+- [x] All required metrics are present and correct
+- [x] Position sizing respects broker limits
+- [x] Core lifecycle and cost tests pass
 
 ---
 
