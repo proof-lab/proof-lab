@@ -114,7 +114,7 @@ def _preprocessing(model: BaseModelWrapper) -> str:
         return "pipeline"
     if getattr(model, "preprocessor", None) is not None:
         return "preprocessor"
-    if model.model_name in {"random_classifier", "majority_classifier"}:
+    if model.model_name in {"random_classifier", "majority_classifier", "simple_rule"}:
         return "identity"
     raise ValueError("Model does not declare a complete preprocessing pipeline.")
 

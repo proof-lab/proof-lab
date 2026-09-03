@@ -20,6 +20,7 @@ Do not pass blind data to `fit`. The integrated training pipeline is still pendi
 | `xgboost.XGBoostModel` | `XGBoostConfig` | Identity pipeline |
 | `neural.NeuralNetworkModel` | `NeuralNetworkConfig` | Training-fitted standardization |
 | `svm.SVMModel` | `SVMConfig` | Earlier-training standardization |
+| `rule.SimpleRuleStrategy` | `SimpleRuleConfig` | Identity |
 
 ML models require `pip install -e ".[ml]"`. Core baselines do not require the ML
 extra. Configuration objects reject unknown settings and invalid parameter ranges;
@@ -65,6 +66,15 @@ methods, calibration comparison, or formal calibration evaluation; those remain
 M05 work. The library's own probability fitting remains disabled, and the fitted
 SVM is never refitted on probability rows. Class decisions follow the SVM margin
 and can differ from the probability argmax, as with native SVM estimates.
+
+The Simple Rule baseline requires a feature name, lower/upper thresholds, setup
+direction, and `mean_reversion` or `momentum` mode. Thresholds are inclusive and
+fixed; fitting validates the schema without learning from labels. Mean reversion
+triggers LONG at or below the lower threshold and SHORT at or above the upper;
+momentum reverses those conditions. Other observations produce IGNORE. Its fixed
+class vocabulary is the configured action plus IGNORE, even if training labels
+contain only one class. Probability-shaped output is strictly one-hot action
+encoding, not an estimated success probability or a calibrated confidence score.
 
 ## Native research artifacts
 
