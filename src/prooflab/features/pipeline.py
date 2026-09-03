@@ -36,11 +36,13 @@ class FeatureSetPreset(StrEnum):
 
 
 class FeaturePipeline:
-    """Orchestrates multi-family feature generation with strict causality and lookback management."""
+    """Orchestrates multi-family feature generation with causality and lookback management."""
 
     def __init__(
         self,
-        features: FeatureSetPreset | list[str] | list[FeatureFamily] = FeatureSetPreset.ALL_STANDARD,
+        features: (
+            FeatureSetPreset | list[str] | list[FeatureFamily]
+        ) = FeatureSetPreset.ALL_STANDARD,
         include_raw_columns: bool = True,
     ) -> None:
         self.include_raw_columns = include_raw_columns
@@ -50,7 +52,7 @@ class FeaturePipeline:
         self,
         features: FeatureSetPreset | list[str] | list[FeatureFamily],
     ) -> list[str]:
-        """Resolve a preset, list of families, or list of feature names into a flat list of feature names."""
+        """Resolve a preset, family list, or feature names into a flat list of feature names."""
         if isinstance(features, FeatureSetPreset) or isinstance(features, str):
             preset = FeatureSetPreset(features)
             if preset == FeatureSetPreset.PRICE_ONLY:
