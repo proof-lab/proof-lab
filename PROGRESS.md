@@ -519,7 +519,7 @@ A package must declare required symbol, timeframe, features, feature parameters,
 - [x] Implement the export pipeline
 - [x] Implement the import pipeline with full security validation
 - [x] Implement compatibility declaration and checking
-- [ ] Write tests for both valid packages and malicious/unsafe packages
+- [x] Write tests for both valid packages and malicious/unsafe packages
 
 ### Human Review Checklist
 
