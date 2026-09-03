@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC
 from typing import TYPE_CHECKING, Literal
 
@@ -96,3 +97,36 @@ def predict_records(
                          for name, votes in batch.model_votes.items()},
         ))
     return records
+
+
+@dataclass(frozen=True)
+class PredictionResult:
+    """Diagnostics kept outside the exact five-field serialized record schema.
+
+    Confidence is unavailable without formal calibration. Agreement is always
+    the fraction of member votes matching the emitted prediction, not confidence.
+    """
+
+    records: list[EnsemblePrediction]
+    confidence: np.ndarray | None
+    agreement: np.ndarray
+    probability_kind: Literal["raw", "calibrated"]
+
+
+def predict_with_confidence(
+    model: DirectionalEnsemble | CalibratedEnsemble, features: pd.DataFrame, *, symbol: str,
+) -> PredictionResult:
+    """Return calibrated P(emitted class), even when hard voting disagrees with argmax."""
+    records = predict_records(model, features, symbol=symbol)
+    calibrated = False
+    if not isinstance(model, DirectionalEnsemble):
+        from prooflab.models.calibration import CalibratedEnsemble
+        calibrated = isinstance(model, CalibratedEnsemble)
+    confidence = (np.array([record.probabilities.model_dump()[record.prediction]
+                            for record in records]) if calibrated else None)
+    agreement = np.array([
+        sum(vote == record.prediction for vote in record.model_votes.values())
+        / len(record.model_votes)
+        for record in records
+    ])
+    return PredictionResult(records, confidence, agreement, "calibrated" if calibrated else "raw")

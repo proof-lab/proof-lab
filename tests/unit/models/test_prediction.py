@@ -78,3 +78,41 @@ def test_invalid_prediction_schema(change):
         payload["model_votes"]["a"] = "SELL"
     with pytest.raises(ValueError):
         EnsemblePrediction.model_validate(payload)
+
+
+@pytest.mark.parametrize("method", ["hard_vote", "probability_average", "weighted_average"])
+def test_uncalibrated_confidence_is_unavailable(member_factory, method):
+    from prooflab.models.prediction import predict_with_confidence
+    settings = {"weights": {"a": 1}} if method == "weighted_average" else {}
+    model = DirectionalEnsemble({"a": member_factory()}, config(method=method, **settings))
+    x = pd.DataFrame({"signal": [1.]}, index=pd.DatetimeIndex(["2020-01-15"], tz="UTC"))
+    result = predict_with_confidence(model, x, symbol="SYNTH")
+    assert result.confidence is None
+    assert result.agreement[0] == 1
+    assert result.probability_kind == "raw"
+
+
+@pytest.mark.parametrize("method", ["platt", "isotonic"])
+@pytest.mark.parametrize("action,direction", [(1, "LONG"), (-1, "SHORT")])
+def test_confidence_is_probability_of_emitted_class_not_votes(member_factory, method, action,
+                                                             direction):
+    pytest.importorskip("sklearn")
+    from prooflab.models.calibration import CalibratedEnsemble, CalibrationConfig
+    from prooflab.models.prediction import predict_with_confidence
+    model = DirectionalEnsemble({"a": member_factory(action)}, config(direction))
+    index = pd.date_range("2020-01-05", periods=10, freq="h", tz="UTC")
+    x = pd.DataFrame({"signal": np.ones(10)}, index=index)
+    y = pd.Series([0] * 8 + [action] * 2, index=index)
+    ends = pd.Series(index + pd.Timedelta("1h"), index=index)
+    calibrated = CalibratedEnsemble(model, CalibrationConfig(
+        method=method, start="2020-01-04T00:00:00Z", end="2020-01-10T00:00:00Z",
+    )).fit(x, y, horizon_end_times=ends)
+    x.index += pd.Timedelta("10D")
+    result = predict_with_confidence(calibrated, x, symbol="SYNTH")
+    assert result.probability_kind == "calibrated"
+    np.testing.assert_array_equal(result.agreement, 1)
+    assert (result.confidence < 0.5).all()  # Agreement can be 100% with low confidence.
+    for row, record in enumerate(result.records):
+        assert record.prediction == ("BUY" if action == 1 else "SELL")
+        assert result.confidence[row] == record.probabilities.model_dump()[record.prediction]
+        assert "confidence" not in record.model_dump()
