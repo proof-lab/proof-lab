@@ -1,5 +1,10 @@
 """Risk engine and sovereign portfolio risk management framework for Proof Lab."""
 
+from prooflab.risk.engine import (
+    RiskDecision,
+    RiskDecisionAction,
+    RiskEngine,
+)
 from prooflab.risk.kill_switch import (
     KillSwitch,
     KillSwitchAuditEvent,
@@ -34,6 +39,9 @@ __all__ = [
     "LimitEvaluationResult",
     "OpenPositionRecord",
     "PositionSizingResult",
+    "RiskDecision",
+    "RiskDecisionAction",
+    "RiskEngine",
     "RiskLimitsConfig",
     "RiskLimitsEvaluator",
     "RiskPositionSizer",
