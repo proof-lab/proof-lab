@@ -348,7 +348,7 @@ The equity curve is generated from the actual simulated account balance and must
 
 - [x] Implement the signal engine that turns predictions into trade decisions under the configured filters
 - [x] Implement the full order lifecycle
-- [ ] Implement spread modelling (historical, fixed, multiplier, stress)
+- [x] Implement spread modelling (historical, fixed, multiplier, stress)
 - [ ] Implement commission, slippage and swap cost models
 - [ ] Implement portfolio accounting and the equity curve
 - [ ] Calculate the complete metrics suite listed above
