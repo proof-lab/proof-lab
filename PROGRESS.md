@@ -318,7 +318,7 @@ The system must track the number of experiments performed and warn when many exp
 ## M07 – Backtesting Engine 🔄 IN PROGRESS
 
 **Branch:** `feat/m07-backtesting-engine`  
-**Status:** Active – agent is working here
+**Status:** Active – all tasks implemented, awaiting human review
 
 ### Context for the Agent
 
@@ -352,7 +352,9 @@ The equity curve is generated from the actual simulated account balance and must
 - [x] Implement commission, slippage and swap cost models
 - [x] Implement portfolio accounting and the equity curve
 - [x] Calculate the complete metrics suite listed above
-- [ ] Write tests covering entry, exit, stop, target, costs, partial fills and lifecycle edge cases
+- [x] Write tests covering entry, exit, stop, target, costs, partial fills and lifecycle edge cases
+
+All M07 tasks are committed and ready for human review.
 
 ### Human Review Checklist
 
