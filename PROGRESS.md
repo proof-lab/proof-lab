@@ -350,7 +350,7 @@ The equity curve is generated from the actual simulated account balance and must
 - [x] Implement the full order lifecycle
 - [x] Implement spread modelling (historical, fixed, multiplier, stress)
 - [x] Implement commission, slippage and swap cost models
-- [ ] Implement portfolio accounting and the equity curve
+- [x] Implement portfolio accounting and the equity curve
 - [ ] Calculate the complete metrics suite listed above
 - [ ] Write tests covering entry, exit, stop, target, costs, partial fills and lifecycle edge cases
 
