@@ -37,6 +37,9 @@ class FoldPlan(BaseModel):
     dataset_end: AwareDatetime
     timeline_checksum: str
     configuration: dict[str, Any]
+    purged_training: tuple[int, ...] = ()
+    purged_validation: tuple[int, ...] = ()
+    horizon_bars: tuple[int, ...] = ()
 
 
 class WalkForwardConfig(SplitConfig):
@@ -98,16 +101,19 @@ def _plan(
 
 def chronological_split(
     index: pd.DatetimeIndex, config: SplitConfig, *, dataset_end: pd.Timestamp,
+    horizon_bars: pd.Series | None = None,
 ) -> FoldPlan:
     """Plan training then validation, reserving the final blind interval separately."""
     blind = blind_boundary(config, dataset_end)
     validate_timeline(index, blind)
     boundary = int(index.searchsorted(pd.Timestamp(config.validation_start)))
-    return _plan(index, config, dataset_end, blind, 0, boundary, len(index), 0)
+    plan = _plan(index, config, dataset_end, blind, 0, boundary, len(index), 0)
+    return purge(plan, index, horizon_bars=horizon_bars)
 
 
 def walk_forward(
     index: pd.DatetimeIndex, config: WalkForwardConfig, *, dataset_end: pd.Timestamp,
+    horizon_bars: pd.Series | None = None,
 ) -> tuple[FoldPlan, ...]:
     """Generate complete expanding/rolling research windows; omit an incomplete final window."""
     blind = blind_boundary(config, dataset_end)
@@ -127,4 +133,45 @@ def walk_forward(
                            start + config.validation_bars, len(plans)))
     if not plans:
         raise ValueError("No complete walk-forward validation window fits before blind.")
-    return tuple(plans)
+    return tuple(purge(plan, index, horizon_bars=horizon_bars) for plan in plans)
+
+
+def purge(
+    plan: FoldPlan, index: pd.DatetimeIndex, *, horizon_bars: pd.Series | None = None,
+) -> FoldPlan:
+    """Exclude full horizons reaching the next partition, even for early barrier hits.
+
+    Horizons count actual observations, preserving weekend/gap semantics. A
+    sample with insufficient future observations is excluded, never shortened.
+    Optional per-row horizons must be known setup configuration, not realized exits.
+    """
+    validate_timeline(index, pd.Timestamp(plan.blind_start))
+    checksum = hashlib.sha256(index.as_unit("ns").asi8.tobytes()).hexdigest()
+    if checksum != plan.timeline_checksum:
+        raise ValueError("Fold timeline differs from its recorded checksum.")
+    maximum = int(plan.configuration["max_label_horizon"])
+    if horizon_bars is None:
+        horizons = [maximum] * len(index)
+    else:
+        if (
+            not horizon_bars.index.equals(index) or horizon_bars.dtype.kind not in "iu"
+            or not horizon_bars.between(1, maximum).all()
+        ):
+            raise ValueError("Horizon bars must align with the timeline and stay within maximum.")
+        horizons = [int(value) for value in horizon_bars]
+
+    def retained(positions: tuple[int, ...], end: AwareDatetime) -> tuple[int, ...]:
+        return tuple(i for i in positions if i + horizons[i] < len(index)
+                     and index[i + horizons[i]] < end)
+
+    train = retained(plan.train_indices, plan.validation_start)
+    validation = retained(plan.validation_indices, plan.validation_end)
+    if not train or not validation:
+        raise ValueError("Purging leaves an empty training or validation partition.")
+    train_set, validation_set = set(train), set(validation)
+    return plan.model_copy(update={
+        "train_indices": train, "validation_indices": validation,
+        "purged_training": tuple(i for i in plan.train_indices if i not in train_set),
+        "purged_validation": tuple(i for i in plan.validation_indices if i not in validation_set),
+        "horizon_bars": tuple(horizons),
+    })

@@ -19,8 +19,8 @@ def config(**updates):
 
 def test_chronological_partition_and_default_calendar_blind(timeline):
     plan = chronological_split(timeline, config(), dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
-    assert plan.train_indices == tuple(range(31))
-    assert plan.validation_indices == tuple(range(31, 60))
+    assert plan.train_indices == tuple(range(28))
+    assert plan.validation_indices == tuple(range(31, 57))
     assert plan.validation_end == plan.blind_start
     assert "blind_indices" not in plan.model_dump()
     default = chronological_split(timeline, config(blind_start=None),
@@ -66,10 +66,10 @@ def test_walk_forward_complete_windows(timeline, mode):
                             validation_bars=10, step_bars=10)
     plans = walk_forward(timeline, cfg, dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
     assert len(plans) == 2
-    assert plans[0].train_indices == tuple(range(11, 31))
-    assert plans[1].train_indices == tuple(range(21 if mode == "rolling" else 11, 41))
-    assert plans[0].validation_indices == tuple(range(31, 41))
-    assert plans[1].validation_indices == tuple(range(41, 51))
+    assert plans[0].train_indices == tuple(range(11, 28))
+    assert plans[1].train_indices == tuple(range(21 if mode == "rolling" else 11, 38))
+    assert plans[0].validation_indices == tuple(range(31, 38))
+    assert plans[1].validation_indices == tuple(range(41, 48))
     assert plans[0].validation_end <= plans[1].validation_start
 
 
@@ -82,3 +82,34 @@ def test_invalid_walk_forward_windows(timeline):
         cfg = WalkForwardConfig(**{**config().model_dump(), "validation_bars": 10, **kwargs})
         with pytest.raises(ValueError):
             walk_forward(timeline, cfg, dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
+
+
+
+def test_purge_full_horizons_and_irregular_times(timeline):
+    index = timeline.delete([4, 5, 12])
+    horizons = pd.Series(1, index=index)
+    horizons.iloc[25] = 3
+    plan = chronological_split(index, config(), dataset_end=pd.Timestamp("2022-03-01", tz="UTC"),
+                               horizon_bars=horizons)
+    assert 25 in plan.purged_training
+    assert 26 in plan.train_indices
+    assert 27 in plan.purged_training
+    assert all(index[i + horizons.iloc[i]] < plan.validation_start for i in plan.train_indices)
+    assert all(index[i + horizons.iloc[i]] < plan.blind_start for i in plan.validation_indices)
+    assert plan.purged_validation == (len(index) - 1,)
+
+
+@pytest.mark.parametrize("change", ["unaligned", "zero", "large", "float"])
+def test_invalid_full_horizons(timeline, change):
+    horizons = pd.Series(3, index=timeline)
+    if change == "unaligned":
+        horizons = horizons.iloc[::-1]
+    elif change == "zero":
+        horizons.iloc[0] = 0
+    elif change == "large":
+        horizons.iloc[0] = 4
+    else:
+        horizons = horizons.astype(float)
+    with pytest.raises(ValueError, match="Horizon bars"):
+        chronological_split(timeline, config(), dataset_end=pd.Timestamp("2022-03-01", tz="UTC"),
+                            horizon_bars=horizons)
