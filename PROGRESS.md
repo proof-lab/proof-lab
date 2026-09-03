@@ -392,7 +392,7 @@ Every completed experiment should produce a research report containing configura
 
 - [x] Build the Proof Engine scorecard
 - [x] Produce equity-curve and drawdown data
-- [ ] Calculate global feature importance
+- [x] Calculate global feature importance
 - [ ] Implement parameter sensitivity tests
 - [ ] Implement spread and slippage stress tests
 - [ ] Implement Monte Carlo trade-order reshuffling (≥ 1 000 runs)
