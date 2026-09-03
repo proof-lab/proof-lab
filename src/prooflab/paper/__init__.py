@@ -7,11 +7,17 @@ from prooflab.paper.consumer import (
     LiveTick,
     MarketDataConsumer,
 )
+from prooflab.paper.features import (
+    LiveFeatureCalculator,
+    LiveFeatureResult,
+)
 
 __all__ = [
     "ConsumerConfig",
     "DataQualityIssue",
     "LiveBar",
+    "LiveFeatureCalculator",
+    "LiveFeatureResult",
     "LiveTick",
     "MarketDataConsumer",
 ]
