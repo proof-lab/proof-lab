@@ -9,11 +9,21 @@ from prooflab.proof.scorecard import (
     EquityCurveData,
     ProofScorecard,
 )
+from prooflab.proof.sensitivity import (
+    ParameterSensitivityAnalyzer,
+    ParameterSensitivityConfig,
+    ParameterSensitivityResult,
+    SensitivityGridCell,
+)
 
 __all__ = [
     "EquityCurveData",
     "FeatureImportanceAnalyzer",
     "FeatureImportanceEntry",
     "FeatureImportanceResult",
+    "ParameterSensitivityAnalyzer",
+    "ParameterSensitivityConfig",
+    "ParameterSensitivityResult",
     "ProofScorecard",
+    "SensitivityGridCell",
 ]
