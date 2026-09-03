@@ -295,7 +295,7 @@ The system must track the number of experiments performed and warn when many exp
 
 ### Tasks
 
-- [ ] Implement chronological train / validation / blind-test splitting
+- [x] Implement chronological train / validation / blind-test splitting
 - [ ] Implement expanding and rolling walk-forward generators
 - [ ] Implement purging
 - [ ] Implement embargo logic (length ≥ label horizon)
