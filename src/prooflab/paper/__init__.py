@@ -7,6 +7,11 @@ from prooflab.paper.consumer import (
     LiveTick,
     MarketDataConsumer,
 )
+from prooflab.paper.execution import (
+    PaperExecutionConfig,
+    PaperExecutionEngine,
+    PaperPosition,
+)
 from prooflab.paper.features import (
     LiveFeatureCalculator,
     LiveFeatureResult,
@@ -14,6 +19,9 @@ from prooflab.paper.features import (
 from prooflab.paper.inference import (
     InferencePrediction,
     LiveInferenceEngine,
+)
+from prooflab.paper.ledger import (
+    PaperTradeLedger,
 )
 
 __all__ = [
@@ -26,4 +34,8 @@ __all__ = [
     "LiveInferenceEngine",
     "LiveTick",
     "MarketDataConsumer",
+    "PaperExecutionConfig",
+    "PaperExecutionEngine",
+    "PaperPosition",
+    "PaperTradeLedger",
 ]
