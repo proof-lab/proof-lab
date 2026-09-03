@@ -411,4 +411,40 @@ Every completed experiment should produce a research report containing configura
 
 ---
 
+## M09 – Risk Engine ✅ COMPLETE
+
+**Branch:** `feat/m09-risk-engine`  
+**Status:** Completed and reviewed
+
+### Context for the Agent
+
+Risk management operates independently of model predictions. The model may say BUY while the risk engine says REJECT; the risk engine always wins.
+
+Required limits: max risk per trade, max open positions, max total exposure, max leverage, max symbol exposure, max daily loss, max weekly loss, max consecutive losses. Maximum daily loss (example: 3 % of start-of-day equity) disables new trades when breached.
+
+The kill switch must: stop new orders, cancel pending orders, optionally close open positions according to configured policy, persist its state, and produce an audit event.
+
+Trading must automatically pause when any of the following occurs: market data is stale, broker connection is lost, model artifact is invalid, feature calculation fails, unexpected spread occurs, risk limits are exceeded, news blackout is active, model confidence is below threshold, system clock is invalid, or a duplicate signal is detected.
+
+Position sizing remains risk-based as defined earlier. All of these controls must be testable in isolation from any live broker.
+
+### Tasks
+
+- [x] Implement risk-based position sizing
+- [x] Implement the full set of exposure, loss and consecutive-loss limits
+- [x] Implement maximum daily and weekly loss handling
+- [x] Implement the kill switch with the required behaviour and audit event
+- [x] Implement the safety-condition checks that automatically pause trading
+- [x] Write tests proving that risk rules can reject any model signal
+
+### Human Review Checklist
+
+- [x] Risk engine can reject BUY/SELL signals
+- [x] Kill switch persists state and emits an audit event
+- [x] Daily loss limit disables new trades
+- [x] All required limits are present and enforced
+- [x] No live broker code has been introduced
+
+---
+
 _End of current work._
