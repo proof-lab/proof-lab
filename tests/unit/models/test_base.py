@@ -110,3 +110,75 @@ def test_validation_input_errors() -> None:
     # Length mismatch
     with pytest.raises(ValueError, match="Length mismatch"):
         model.fit(pd.DataFrame({"a": [1, 2]}), np.array([1]))
+
+
+@pytest.mark.parametrize("labels", [np.array(1), [[1], [0]], [1, 2], [1, np.nan],
+                                   [True, False], ["1", "0"]])
+def test_invalid_labels(labels: Any) -> None:
+    with pytest.raises(ValueError, match="Labels"):
+        DummyModel().fit(pd.DataFrame({"a": [1, 2]}), labels)
+
+
+@pytest.mark.parametrize("features", [
+    pd.DataFrame([[1, 2]], columns=["a", "a"]),
+    pd.DataFrame({"a": [float("inf")]}),
+    pd.DataFrame({"a": [float("nan")]}),
+    pd.DataFrame({"a": ["text"]}),
+    pd.DataFrame({"a": [1, 2]}, index=[0, 0]),
+    pd.DataFrame({1: [1]}),
+])
+def test_invalid_feature_matrices(features: pd.DataFrame) -> None:
+    with pytest.raises(ValueError):
+        DummyModel().fit(features, np.ones(len(features)))
+
+
+def test_series_alignment_and_failed_refit(sample_data: tuple[pd.DataFrame, pd.Series]) -> None:
+    features, labels = sample_data
+    model = DummyModel().fit(features, labels)
+    with pytest.raises(ValueError, match="indices"):
+        model.fit(features, labels.iloc[::-1])
+    with pytest.raises(ModelNotFittedError):
+        model.predict(features)
+
+
+def test_validation_schema(sample_data: tuple[pd.DataFrame, pd.Series]) -> None:
+    features, labels = sample_data
+    with pytest.raises(ValueError, match="Missing required"):
+        DummyModel().fit(features, labels, (features[["feat_1"]], labels))
+    with pytest.raises(ValueError, match="Unexpected"):
+        DummyModel().fit(features, labels).predict(features.assign(extra=0))
+    DummyModel().fit(features, labels, (features.iloc[:, ::-1], labels))
+
+
+@pytest.mark.parametrize("probabilities", [
+    np.ones((1, 3)) / 3,
+    np.ones((4, 3)),
+    np.full((4, 3), np.nan),
+    np.tile([-0.1, 0.5, 0.6], (4, 1)),
+])
+def test_invalid_probability_outputs(
+    sample_data: tuple[pd.DataFrame, pd.Series], probabilities: np.ndarray,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    features, labels = sample_data
+    model = DummyModel().fit(features, labels)
+    monkeypatch.setattr(model, "_predict_proba_internal", lambda _: probabilities)
+    with pytest.raises(ValueError):
+        model.predict_proba(features)
+
+
+def test_internal_fit_failure_and_invalid_predictions(
+    sample_data: tuple[pd.DataFrame, pd.Series], monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    features, labels = sample_data
+    model = DummyModel(99).fit(features, labels)
+    with pytest.raises(ValueError, match="known class"):
+        model.predict(features)
+
+    def fail(*args: Any) -> None:
+        raise RuntimeError("Training failed")
+
+    monkeypatch.setattr(model, "_fit_internal", fail)
+    with pytest.raises(RuntimeError):
+        model.fit(features, labels)
+    assert not model.is_fitted

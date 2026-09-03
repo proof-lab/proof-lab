@@ -23,6 +23,7 @@ class BaseModelWrapper(ABC):
     def __init__(self, model_name: str) -> None:
         self.model_name = model_name
         self.feature_names: list[str] = []
+        self.feature_schema: dict[str, str] = {}
         self.classes_: list[int] = []
         self.is_fitted: bool = False
 
@@ -32,6 +33,24 @@ class BaseModelWrapper(ABC):
         labels: pd.Series | np.ndarray,
     ) -> tuple[pd.DataFrame, np.ndarray]:
         """Validate feature matrix and label vector dimensions."""
+        self._validate_matrix(features)
+        y_arr = np.asarray(labels)
+        if y_arr.ndim != 1:
+            raise ValueError("Labels must be one-dimensional.")
+        if len(features) != len(y_arr):
+            raise ValueError(
+                f"Length mismatch: features has {len(features)} rows "
+                f"but labels has {len(y_arr)} elements."
+            )
+        if isinstance(labels, pd.Series) and not labels.index.equals(features.index):
+            raise ValueError("Feature and label indices must match exactly.")
+        if y_arr.dtype.kind not in "iuf" or not np.isin(y_arr, [-1, 0, 1]).all():
+            raise ValueError("Labels must contain only canonical classes -1, 0, 1.")
+        return features, y_arr.astype(np.int64)
+
+    @staticmethod
+    def _validate_matrix(features: pd.DataFrame) -> None:
+        """Require an unambiguous, finite numeric feature matrix."""
         if not isinstance(features, pd.DataFrame):
             raise TypeError(
                 f"Features must be a pandas DataFrame, got {type(features).__name__}."
@@ -40,14 +59,26 @@ class BaseModelWrapper(ABC):
         if features.empty:
             raise ValueError("Feature matrix cannot be empty.")
 
-        y_arr = np.asarray(labels)
-        if len(features) != len(y_arr):
-            raise ValueError(
-                f"Length mismatch: features has {len(features)} rows "
-                f"but labels has {len(y_arr)} elements."
-            )
+        if not features.columns.is_unique or not all(
+            isinstance(name, str) and name for name in features.columns
+        ):
+            raise ValueError("Feature names must be unique nonempty strings.")
+        if not features.index.is_unique:
+            raise ValueError("Feature row indices must be unique.")
+        if any(dtype.kind not in "iuf" for dtype in features.dtypes):
+            raise ValueError("Features must be real numeric values.")
+        if not np.isfinite(features.to_numpy(dtype=float)).all():
+            raise ValueError("Features must contain only finite values.")
 
-        return features, y_arr
+    def _align_features(self, features: pd.DataFrame) -> pd.DataFrame:
+        self._validate_matrix(features)
+        missing = [col for col in self.feature_names if col not in features.columns]
+        if missing:
+            raise ValueError(f"Missing required feature columns: {missing}")
+        extra = [col for col in features.columns if col not in self.feature_names]
+        if extra:
+            raise ValueError(f"Unexpected feature columns: {extra}")
+        return features[self.feature_names]
 
     def _validate_features(self, features: pd.DataFrame) -> pd.DataFrame:
         """Validate that test/inference features contain all required columns in expected order."""
@@ -56,19 +87,7 @@ class BaseModelWrapper(ABC):
                 f"Model '{self.model_name}' is not fitted yet. Call 'fit' before predicting."
             )
 
-        if not isinstance(features, pd.DataFrame):
-            raise TypeError(
-                f"Features must be a pandas DataFrame, got {type(features).__name__}."
-            )
-
-        missing = [col for col in self.feature_names if col not in features.columns]
-        if missing:
-            raise ValueError(
-                f"Missing required feature columns for model '{self.model_name}': {missing}"
-            )
-
-        # Enforce exact column order as seen during training
-        return features[self.feature_names]
+        return self._align_features(features)
 
     def fit(
         self,
@@ -76,19 +95,29 @@ class BaseModelWrapper(ABC):
         labels: pd.Series | np.ndarray,
         val_data: tuple[pd.DataFrame, pd.Series | np.ndarray] | None = None,
     ) -> Self:
-        """Fit the model on training data, optionally evaluating on validation data."""
+        """Fit training data; the caller must enforce chronological split isolation.
+
+        Array labels are positional; Series labels must have matching indices.
+        Validation may contain an unseen canonical class, but never expands the
+        training-derived class vocabulary. Failed fitting invalidates the model.
+        """
+        self.is_fitted = False
+        self.feature_names = []
+        self.feature_schema = {}
+        self.classes_ = []
         clean_features, y_arr = self._validate_inputs(features, labels)
         self.feature_names = list(clean_features.columns)
+        self.feature_schema = {name: str(dtype) for name, dtype in clean_features.dtypes.items()}
 
         unique_classes = sorted(np.unique(y_arr).tolist())
         self.classes_ = unique_classes
 
-        # Validate val_data if provided (ensuring split separation)
+        # These checks validate shape/schema, not chronological separation.
         val_clean: tuple[pd.DataFrame, np.ndarray] | None = None
         if val_data is not None:
             val_x, val_y = val_data
             val_x_clean, val_y_arr = self._validate_inputs(val_x, val_y)
-            val_clean = (val_x_clean[self.feature_names], val_y_arr)
+            val_clean = (self._align_features(val_x_clean), val_y_arr)
 
         self._fit_internal(clean_features, y_arr, val_clean)
         self.is_fitted = True
@@ -98,7 +127,10 @@ class BaseModelWrapper(ABC):
         """Generate discrete class predictions for input samples."""
         aligned_features = self._validate_features(features)
         preds = self._predict_internal(aligned_features)
-        return np.asarray(preds)
+        result = np.asarray(preds)
+        if result.shape != (len(features),) or not np.isin(result, self.classes_).all():
+            raise ValueError("Predictions must be one known class per input row.")
+        return result.astype(np.int64)
 
     def predict_proba(self, features: pd.DataFrame) -> np.ndarray:
         """Generate class probability distributions (shape: (N, n_classes))."""
@@ -106,12 +138,20 @@ class BaseModelWrapper(ABC):
         proba = self._predict_proba_internal(aligned_features)
         proba_arr = np.asarray(proba)
 
-        if proba_arr.ndim != 2 or proba_arr.shape[1] != len(self.classes_):
+        if proba_arr.shape != (len(features), len(self.classes_)):
             raise ValueError(
                 f"Predicted probabilities shape {proba_arr.shape} does not match "
                 f"expected (N, {len(self.classes_)})."
             )
 
+        if (
+            proba_arr.dtype.kind not in "iuf"
+            or not np.isfinite(proba_arr).all()
+            or (proba_arr < 0).any()
+            or (proba_arr > 1).any()
+            or not np.allclose(proba_arr.sum(axis=1), 1.0, atol=1e-6, rtol=0)
+        ):
+            raise ValueError("Probabilities must be finite, in [0, 1], and sum to one.")
         return proba_arr
 
     @abstractmethod
