@@ -208,12 +208,12 @@ All M04 tasks are committed and ready for human review.
 
 ### Human Review Checklist
 
-- [ ] All models implement the same interface
-- [ ] Tuning and early stopping cannot see the blind test set
-- [ ] Artifacts contain everything needed for later inference
-- [ ] Baselines are present and functional
-- [ ] No ensemble or calibration logic has been added yet
-- [ ] Training remains free of future information
+- [x] All models implement the same interface
+- [x] Tuning and early stopping cannot see the blind test set
+- [x] Artifacts contain everything needed for later inference
+- [x] Baselines are present and functional
+- [x] No ensemble or calibration logic has been added yet
+- [x] Training remains free of future information
 
 ---
 
