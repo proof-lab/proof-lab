@@ -72,6 +72,7 @@ class ArtifactManifest(BaseModel):
     preprocessing: Literal["identity", "pipeline", "preprocessor"]
     training: TrainingMetadata
     training_history: list[dict[str, Any]] = Field(default_factory=list)
+    fit_details: dict[str, Any] = Field(default_factory=dict)
     best_epoch: int | None = None
     stopped_epoch: int | None = None
     dependencies: dict[str, str]
@@ -152,6 +153,7 @@ def save_artifact(
         "feature_schema": model.feature_schema, "feature_metadata": feature_metadata,
         "classes": model.classes_, "preprocessing": preprocessing, "training": training,
         "training_history": getattr(model, "history_", []),
+        "fit_details": model.fit_details_,
         "best_epoch": getattr(model, "best_epoch_", None),
         "stopped_epoch": getattr(model, "stopped_epoch_", None),
         "dependencies": _dependencies(model),
@@ -210,6 +212,7 @@ def load_artifact(
         or content.get("preprocessing") != manifest.preprocessing
         or _dependencies(model) != manifest.dependencies
         or getattr(model, "history_", []) != manifest.training_history
+        or model.fit_details_ != manifest.fit_details
         or getattr(model, "best_epoch_", None) != manifest.best_epoch
         or getattr(model, "stopped_epoch_", None) != manifest.stopped_epoch
     ):

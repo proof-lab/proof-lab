@@ -26,6 +26,8 @@ class BaseModelWrapper(ABC):
         self.feature_schema: dict[str, str] = {}
         self.classes_: list[int] = []
         self.is_fitted: bool = False
+        self.fit_details_: dict[str, Any] = {}
+        self._horizon_end_times: pd.Series | None = None
 
     def _validate_inputs(
         self,
@@ -94,6 +96,8 @@ class BaseModelWrapper(ABC):
         features: pd.DataFrame,
         labels: pd.Series | np.ndarray,
         val_data: tuple[pd.DataFrame, pd.Series | np.ndarray] | None = None,
+        *,
+        horizon_end_times: pd.Series | None = None,
     ) -> Self:
         """Fit training data; the caller must enforce chronological split isolation.
 
@@ -105,7 +109,11 @@ class BaseModelWrapper(ABC):
         self.feature_names = []
         self.feature_schema = {}
         self.classes_ = []
+        self.fit_details_ = {}
+        self._horizon_end_times = None
         clean_features, y_arr = self._validate_inputs(features, labels)
+        if horizon_end_times is not None:
+            self._validate_horizons(clean_features, horizon_end_times)
         self.feature_names = list(clean_features.columns)
         self.feature_schema = {name: str(dtype) for name, dtype in clean_features.dtypes.items()}
 
@@ -119,9 +127,31 @@ class BaseModelWrapper(ABC):
             val_x_clean, val_y_arr = self._validate_inputs(val_x, val_y)
             val_clean = (self._align_features(val_x_clean), val_y_arr)
 
-        self._fit_internal(clean_features, y_arr, val_clean)
+        self._horizon_end_times = horizon_end_times
+        try:
+            self._fit_internal(clean_features, y_arr, val_clean)
+        finally:
+            # Boundary evidence is recorded in fit_details_; retain no training rows.
+            self._horizon_end_times = None
         self.is_fitted = True
         return self
+
+    @staticmethod
+    def _validate_horizons(features: pd.DataFrame, ends: pd.Series) -> None:
+        """Validate full-horizon timestamps supplied by the chronological pipeline."""
+        if (
+            not isinstance(features.index, pd.DatetimeIndex)
+            or str(features.index.tz) != "UTC"
+            or not features.index.is_monotonic_increasing
+        ):
+            raise ValueError("Horizon context requires ordered UTC feature timestamps.")
+        if (
+            not isinstance(ends, pd.Series) or not ends.index.equals(features.index)
+            or not isinstance(ends.dtype, pd.DatetimeTZDtype)
+            or str(ends.dt.tz) != "UTC" or ends.isna().any()
+            or not (ends > features.index).all()
+        ):
+            raise ValueError("Full horizon ends must be aligned UTC timestamps after each entry.")
 
     def predict(self, features: pd.DataFrame) -> np.ndarray:
         """Generate discrete class predictions for input samples."""
