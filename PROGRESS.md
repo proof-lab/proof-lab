@@ -396,7 +396,7 @@ Every completed experiment should produce a research report containing configura
 - [x] Implement parameter sensitivity tests
 - [x] Implement spread and slippage stress tests
 - [x] Implement Monte Carlo trade-order reshuffling (≥ 1 000 runs)
-- [ ] Implement regime performance analysis
+- [x] Implement regime performance analysis
 - [ ] Define and apply the explicit Proof Status rules
 - [ ] Generate the full research report with warnings
 
