@@ -153,13 +153,13 @@ The same feature implementations will later be reused for live inference; there 
 
 ### Human Review Checklist
 
-- [ ] Every feature declares its maximum lookback
-- [ ] No feature can access future data
-- [ ] Scalers are fitted only on training data
-- [ ] Metadata is complete for every feature
-- [ ] Core families required by the MVP are present
-- [ ] Tests demonstrate no leakage
-- [ ] Microstructure features are not fabricated from OHLCV alone
+- [x] Every feature declares its maximum lookback
+- [x] No feature can access future data
+- [x] Scalers are fitted only on training data
+- [x] Metadata is complete for every feature
+- [x] Core families required by the MVP are present
+- [x] Tests demonstrate no leakage
+- [x] Microstructure features are not fabricated from OHLCV alone
 
 ---
 
