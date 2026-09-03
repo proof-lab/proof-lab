@@ -14,6 +14,12 @@ from prooflab.risk.limits import (
     RiskLimitsEvaluator,
     RiskStateTracker,
 )
+from prooflab.risk.safety import (
+    SafetyCheckConfig,
+    SafetyCheckResult,
+    SafetyMonitor,
+    SafetyPauseReason,
+)
 from prooflab.risk.sizing import (
     PositionSizingResult,
     RiskPositionSizer,
@@ -32,4 +38,8 @@ __all__ = [
     "RiskLimitsEvaluator",
     "RiskPositionSizer",
     "RiskStateTracker",
+    "SafetyCheckConfig",
+    "SafetyCheckResult",
+    "SafetyMonitor",
+    "SafetyPauseReason",
 ]
