@@ -142,7 +142,7 @@ The same feature implementations will later be reused for live inference; there 
 ### Tasks
 
 - [x] Create the feature metadata system and registry
-- [ ] Implement the price feature family
+- [x] Implement the price feature family
 - [ ] Implement the momentum feature family
 - [ ] Implement the volatility feature family
 - [ ] Implement the trend feature family
