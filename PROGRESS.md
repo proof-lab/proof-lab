@@ -398,7 +398,7 @@ Every completed experiment should produce a research report containing configura
 - [x] Implement Monte Carlo trade-order reshuffling (≥ 1 000 runs)
 - [x] Implement regime performance analysis
 - [x] Define and apply the explicit Proof Status rules
-- [ ] Generate the full research report with warnings
+- [x] Generate the full research report with warnings
 
 ### Human Review Checklist
 
