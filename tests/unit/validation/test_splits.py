@@ -92,7 +92,7 @@ def test_purge_full_horizons_and_irregular_times(timeline):
     plan = chronological_split(index, config(), dataset_end=pd.Timestamp("2022-03-01", tz="UTC"),
                                horizon_bars=horizons)
     assert 25 in plan.purged_training
-    assert 26 in plan.train_indices
+    assert 26 in plan.embargoed_training
     assert 27 in plan.purged_training
     assert all(index[i + horizons.iloc[i]] < plan.validation_start for i in plan.train_indices)
     assert all(index[i + horizons.iloc[i]] < plan.blind_start for i in plan.validation_indices)
@@ -113,3 +113,31 @@ def test_invalid_full_horizons(timeline, change):
     with pytest.raises(ValueError, match="Horizon bars"):
         chronological_split(timeline, config(), dataset_end=pd.Timestamp("2022-03-01", tz="UTC"),
                             horizon_bars=horizons)
+
+
+
+def test_both_embargo_buffers_and_exact_intervals(timeline):
+    from prooflab.validation.splits import WalkForwardConfig, walk_forward
+    cfg = WalkForwardConfig(**config(embargo_bars=5).model_dump(), validation_bars=8, step_bars=8)
+    plans = walk_forward(timeline, cfg, dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
+    assert plans[0].train_indices == tuple(range(26))
+    third = plans[2]
+    post = [span for span in third.embargo_intervals if span.reason == "after_validation"]
+    assert any(span.start_position == 39 and span.stop_position == 44 for span in post)
+    assert not set(third.train_indices).intersection(range(39, 44))
+    assert all(span.configured_bars == 5 for span in third.embargo_intervals)
+    for span in third.embargo_intervals:
+        assert span.start == timeline[span.start_position]
+        assert span.end == (timeline[span.stop_position] if span.stop_position < len(timeline)
+                            else third.blind_start)
+    static = chronological_split(timeline, config(embargo_bars=5),
+                                 dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
+    assert static.validation_indices[-1] == 54
+    assert static.embargoed_validation == (55, 56)
+    assert static.embargo_bars >= static.configuration["max_label_horizon"]
+
+
+def test_embargo_cannot_be_disabled_or_shortened():
+    for length in [0, 1, 2]:
+        with pytest.raises(ValueError):
+            config(embargo_bars=length)

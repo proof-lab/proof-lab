@@ -21,6 +21,25 @@ class SplitConfig(BaseModel):
     blind_start: AwareDatetime | None = None
     blind_years: int = Field(default=2, ge=1, strict=True)
     max_label_horizon: int = Field(ge=1, strict=True)
+    embargo_bars: int | None = Field(default=None, ge=1, strict=True)
+
+    @model_validator(mode="after")
+    def sufficient_embargo(self) -> SplitConfig:
+        if self.embargo_bars is not None and self.embargo_bars < self.max_label_horizon:
+            raise ValueError("Embargo length must be at least the maximum label horizon.")
+        return self
+
+
+class EmbargoInterval(BaseModel):
+    """Half-open UTC interval anchored to positions in the original bar timeline."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    start: AwareDatetime
+    end: AwareDatetime
+    start_position: int
+    stop_position: int
+    reason: Literal["before_validation", "before_blind", "after_validation"]
+    configured_bars: int
 
 
 class FoldPlan(BaseModel):
@@ -40,6 +59,10 @@ class FoldPlan(BaseModel):
     purged_training: tuple[int, ...] = ()
     purged_validation: tuple[int, ...] = ()
     horizon_bars: tuple[int, ...] = ()
+    embargo_bars: int = 0
+    embargo_intervals: tuple[EmbargoInterval, ...] = ()
+    embargoed_training: tuple[int, ...] = ()
+    embargoed_validation: tuple[int, ...] = ()
 
 
 class WalkForwardConfig(SplitConfig):
@@ -108,7 +131,7 @@ def chronological_split(
     validate_timeline(index, blind)
     boundary = int(index.searchsorted(pd.Timestamp(config.validation_start)))
     plan = _plan(index, config, dataset_end, blind, 0, boundary, len(index), 0)
-    return purge(plan, index, horizon_bars=horizon_bars)
+    return apply_embargo(purge(plan, index, horizon_bars=horizon_bars), index)
 
 
 def walk_forward(
@@ -133,7 +156,9 @@ def walk_forward(
                            start + config.validation_bars, len(plans)))
     if not plans:
         raise ValueError("No complete walk-forward validation window fits before blind.")
-    return tuple(purge(plan, index, horizon_bars=horizon_bars) for plan in plans)
+    return tuple(apply_embargo(purge(plan, index, horizon_bars=horizon_bars), index,
+                              previous_windows=tuple(plans[:position]))
+                 for position, plan in enumerate(plans))
 
 
 def purge(
@@ -174,4 +199,62 @@ def purge(
         "purged_training": tuple(i for i in plan.train_indices if i not in train_set),
         "purged_validation": tuple(i for i in plan.validation_indices if i not in validation_set),
         "horizon_bars": tuple(horizons),
+    })
+
+
+def apply_embargo(
+    plan: FoldPlan, index: pd.DatetimeIndex, *, previous_windows: tuple[FoldPlan, ...] = (),
+) -> FoldPlan:
+    """Apply pre-boundary buffers and prior validation post-buffers in later training.
+
+    The masks are independent of purging and may overlap it. Before-blind
+    buffers exclude validation samples too. Post-validation buffers only exclude
+    training entries. Intervals are clipped at blind, which is never available.
+    """
+    validate_timeline(index, pd.Timestamp(plan.blind_start))
+    if hashlib.sha256(index.as_unit("ns").asi8.tobytes()).hexdigest() != plan.timeline_checksum:
+        raise ValueError("Fold timeline differs from its recorded checksum.")
+    length = int(plan.configuration.get("embargo_bars") or plan.configuration["max_label_horizon"])
+    if length < int(plan.configuration["max_label_horizon"]):
+        raise ValueError("Embargo length is below the maximum horizon.")
+    boundary = int(index.searchsorted(pd.Timestamp(plan.validation_start)))
+    intervals: list[EmbargoInterval] = []
+
+    def add(start: int, stop: int, reason: Literal[
+        "before_validation", "before_blind", "after_validation",
+    ]) -> None:
+        start, stop = max(0, start), min(len(index), stop)
+        if start >= stop:
+            return
+        intervals.append(EmbargoInterval(
+            start=index[start], end=index[stop] if stop < len(index) else plan.blind_start,
+            start_position=start, stop_position=stop, reason=reason, configured_bars=length,
+        ))
+
+    add(boundary - length, boundary, "before_validation")
+    add(len(index) - length, len(index), "before_blind")
+    training_start = int(index.searchsorted(pd.Timestamp(plan.train_start)))
+    for previous in previous_windows:
+        if previous.timeline_checksum != plan.timeline_checksum:
+            raise ValueError("Previous validation window belongs to a different timeline.")
+        start = int(index.searchsorted(pd.Timestamp(previous.validation_end)))
+        if start < boundary and start + length > training_start:
+            add(start, start + length, "after_validation")
+    blocked_train: set[int] = set()
+    blocked_validation: set[int] = set()
+    for interval in intervals:
+        positions = range(interval.start_position, interval.stop_position)
+        blocked_train.update(positions)
+        if interval.reason == "before_blind":
+            blocked_validation.update(positions)
+    train = tuple(i for i in plan.train_indices if i not in blocked_train)
+    validation = tuple(i for i in plan.validation_indices if i not in blocked_validation)
+    if not train or not validation:
+        raise ValueError("Embargo leaves an empty training or validation partition.")
+    return plan.model_copy(update={
+        "train_indices": train, "validation_indices": validation, "embargo_bars": length,
+        "embargo_intervals": tuple(intervals),
+        "embargoed_training": tuple(i for i in plan.train_indices if i in blocked_train),
+        "embargoed_validation": tuple(
+            i for i in plan.validation_indices if i in blocked_validation),
     })
