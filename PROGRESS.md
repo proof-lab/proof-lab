@@ -514,8 +514,8 @@ A package must declare required symbol, timeframe, features, feature parameters,
 
 ### Tasks
 
-- [ ] Ensure model artifacts contain every required component
-- [ ] Define the `.plb` ZIP layout and manifest format
+- [x] Ensure model artifacts contain every required component
+- [x] Define the `.plb` ZIP layout and manifest format
 - [ ] Implement the export pipeline
 - [ ] Implement the import pipeline with full security validation
 - [ ] Implement compatibility declaration and checking
