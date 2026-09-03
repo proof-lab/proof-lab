@@ -447,10 +447,10 @@ Position sizing remains risk-based as defined earlier. All of these controls mus
 
 ---
 
-## M10 – Paper Trading 🔄 IN PROGRESS
+## M10 – Paper Trading ✅ COMPLETE
 
 **Branch:** `feat/m10-paper-trading`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -475,11 +475,11 @@ A strategy moves through explicit approval states: RESEARCH → VALIDATED → PA
 
 ### Human Review Checklist
 
-- [ ] Feature code path is identical to training
-- [ ] Incomplete artifacts are rejected
-- [ ] Paper trades are fully recorded with the same schema as live trades
-- [ ] No real broker orders can be sent from this code
-- [ ] Bad or stale data pauses trading
+- [x] Feature code path is identical to training
+- [x] Incomplete artifacts are rejected
+- [x] Paper trades are fully recorded with the same schema as live trades
+- [x] No real broker orders can be sent from this code
+- [x] Bad or stale data pauses trading
 
 ---
 
