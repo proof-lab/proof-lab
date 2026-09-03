@@ -186,7 +186,7 @@ A minimal training pipeline skeleton should execute: Load Dataset â†’ Validate â
 
 ### Tasks
 
-- [ ] Define a common model interface
+- [x] Define a common model interface
 - [ ] Implement Random and Majority baselines
 - [ ] Implement Logistic Regression baseline
 - [ ] Implement the XGBoost model with the required configurability
