@@ -346,7 +346,7 @@ The equity curve is generated from the actual simulated account balance and must
 
 ### Tasks
 
-- [ ] Implement the signal engine that turns predictions into trade decisions under the configured filters
+- [x] Implement the signal engine that turns predictions into trade decisions under the configured filters
 - [ ] Implement the full order lifecycle
 - [ ] Implement spread modelling (historical, fixed, multiplier, stress)
 - [ ] Implement commission, slippage and swap cost models
