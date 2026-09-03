@@ -299,7 +299,7 @@ The system must track the number of experiments performed and warn when many exp
 - [x] Implement expanding and rolling walk-forward generators
 - [x] Implement purging
 - [x] Implement embargo logic (length ≥ label horizon)
-- [ ] Build the leakage detector and prove it catches synthetic leaking cases
+- [x] Build the leakage detector and prove it catches synthetic leaking cases
 - [ ] Create the experiment registry with full reproducibility metadata
 - [ ] Protect the blind test set from casual inspection and multiple-testing abuse
 
