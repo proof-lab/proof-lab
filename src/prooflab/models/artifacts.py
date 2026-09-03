@@ -136,6 +136,7 @@ def _dependencies(model: BaseModelWrapper) -> dict[str, str]:
     if model.model_name == "calibrated_ensemble":
         dependencies.update(_dependencies(model._ensemble))  # type: ignore[attr-defined]
         dependencies["scipy"] = version("scipy")
+        dependencies["scikit-learn"] = version("scikit-learn")
     return dependencies
 
 

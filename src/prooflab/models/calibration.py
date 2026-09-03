@@ -14,6 +14,7 @@ import pandas as pd
 from pydantic import AwareDatetime, BaseModel, ConfigDict, model_validator
 from scipy.optimize import minimize
 from scipy.special import expit
+from sklearn.isotonic import IsotonicRegression
 
 from prooflab.models.base import BaseModelWrapper
 from prooflab.models.ensemble import DirectionalEnsemble, EnsembleBatch
@@ -25,7 +26,7 @@ class CalibrationConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
     version: Literal[1] = 1
-    method: Literal["platt"] = "platt"
+    method: Literal["platt", "isotonic"] = "platt"
     start: AwareDatetime
     end: AwareDatetime
 
@@ -82,7 +83,7 @@ class CalibratedEnsemble(BaseModelWrapper):
             raise ValueError("Calibration window reaches the blind period.")
         self._ensemble = deepcopy(ensemble)
         self.config = config.model_copy(deep=True)
-        self._link: _PlattLink | None = None
+        self._link: _PlattLink | IsotonicRegression | None = None
 
     @property
     def action(self) -> int:
@@ -116,7 +117,13 @@ class CalibratedEnsemble(BaseModelWrapper):
         self.classes_ = list(self._ensemble.classes_)
         batch = self._ensemble.evaluate(features)
         scores = batch.probabilities[:, self.classes_.index(self.action)]
-        self._link = _PlattLink(scores, (labels == self.action).astype(int))
+        binary = (labels == self.action).astype(int)
+        if self.config.method == "platt":
+            self._link = _PlattLink(scores, binary)
+        else:
+            # Clipping uses fitted endpoint values; there is no future-data extrapolation.
+            self._link = IsotonicRegression(y_min=0, y_max=1, increasing=True,
+                                             out_of_bounds="clip").fit(scores, binary)
         self.fit_details_ = {
             "method": self.config.method, "calibration_framework": "m05_v1",
             "score_transform": "raw_action_probability_or_vote_fraction",

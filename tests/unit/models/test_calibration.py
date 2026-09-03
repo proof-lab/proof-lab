@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 pytest.importorskip("scipy")
+pytest.importorskip("sklearn")
 
 from test_ensemble import config
 
@@ -98,11 +99,13 @@ def test_fit_rejects_invalid_data_before_member_prediction(
     assert not model.is_fitted
 
 
-def test_calibrated_artifact_round_trip(member_factory, calibration_data, tmp_path):
+@pytest.mark.parametrize("method", ["platt", "isotonic"])
+def test_calibrated_artifact_round_trip(member_factory, calibration_data, tmp_path, method):
     x, y, ends = calibration_data
     member = member_factory(probability=None)
     ensemble = DirectionalEnsemble({"a": member}, config(method="probability_average"))
-    model = CalibratedEnsemble(ensemble, calibration_config()).fit(x, y, horizon_end_times=ends)
+    model = CalibratedEnsemble(ensemble, calibration_config(method=method)).fit(
+        x, y, horizon_end_times=ends)
     path = tmp_path / "calibrated.plmodel"
     save_artifact(model, path, training=member.manifest.training,
                   feature_metadata=member.manifest.feature_metadata)
@@ -154,3 +157,28 @@ def test_metrics_match_hand_calculation_and_empty_bins():
     empty = probability_quality(np.array([0., 1.]), np.array([0, 1]), n_bins=3)
     assert empty["calibration_curve"][1]["mean_probability"] is None
     assert np.isfinite(probability_quality(np.array([0., 1.]), np.array([1, 0]))["log_loss"])
+
+
+@pytest.mark.parametrize("action,direction", [(1, "LONG"), (-1, "SHORT")])
+def test_isotonic_monotonicity_endpoint_clipping_and_ties(member_factory, action, direction):
+    index = pd.date_range("2020-01-05", periods=8, freq="h", tz="UTC")
+    x = pd.DataFrame({"signal": [0.2, 0.2, 0.4, 0.4, 0.6, 0.6, 0.8, 0.8]}, index=index)
+    y = pd.Series(np.array([0, 0, 0, 1, 0, 1, 1, 1]) * action, index=index)
+    ends = pd.Series(index + pd.Timedelta("1h"), index=index)
+    ensemble = DirectionalEnsemble({"a": member_factory(action, probability=None)},
+                                  config(direction, method="probability_average"))
+    model = CalibratedEnsemble(ensemble, calibration_config(method="isotonic")).fit(
+        x, y, horizon_end_times=ends)
+    probe = pd.DataFrame({"signal": [0., 0.2, 0.4, 0.6, 0.8, 1.]})
+    p = model.predict_proba(probe)[:, model.classes_.index(action)]
+    np.testing.assert_allclose(p, [0, 0, 0.5, 0.5, 1, 1])
+    assert (np.diff(p) >= 0).all()
+    np.testing.assert_array_equal(model.predict(probe), [0, 0, 0, 0, action, action])
+
+
+def test_isotonic_constant_score_is_observed_frequency(member_factory, calibration_data):
+    x, y, ends = calibration_data
+    ensemble = DirectionalEnsemble({"a": member_factory()}, config())
+    model = CalibratedEnsemble(ensemble, calibration_config(method="isotonic")).fit(
+        x, y, horizon_end_times=ends)
+    np.testing.assert_allclose(model.predict_proba(x)[:, 1], y.mean())
