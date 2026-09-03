@@ -15,9 +15,18 @@ from prooflab.proof.sensitivity import (
     ParameterSensitivityResult,
     SensitivityGridCell,
 )
+from prooflab.proof.stress import (
+    ExecutionStressAnalyzer,
+    ExecutionStressConfig,
+    ExecutionStressResult,
+    StressScenarioResult,
+)
 
 __all__ = [
     "EquityCurveData",
+    "ExecutionStressAnalyzer",
+    "ExecutionStressConfig",
+    "ExecutionStressResult",
     "FeatureImportanceAnalyzer",
     "FeatureImportanceEntry",
     "FeatureImportanceResult",
@@ -26,4 +35,5 @@ __all__ = [
     "ParameterSensitivityResult",
     "ProofScorecard",
     "SensitivityGridCell",
+    "StressScenarioResult",
 ]
