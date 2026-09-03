@@ -16,6 +16,10 @@ from prooflab.proof.regime import (
     RegimeBucketMetrics,
     YearlyPerformance,
 )
+from prooflab.proof.report import (
+    ProofEngine,
+    ProofReport,
+)
 from prooflab.proof.scorecard import (
     EquityCurveData,
     ProofScorecard,
@@ -39,6 +43,11 @@ from prooflab.proof.stress import (
     ExecutionStressResult,
     StressScenarioResult,
 )
+from prooflab.proof.warnings import (
+    ResearchWarning,
+    ResearchWarningCode,
+    ResearchWarningDetector,
+)
 
 __all__ = [
     "EquityCurveData",
@@ -54,6 +63,8 @@ __all__ = [
     "ParameterSensitivityAnalyzer",
     "ParameterSensitivityConfig",
     "ParameterSensitivityResult",
+    "ProofEngine",
+    "ProofReport",
     "ProofScorecard",
     "ProofStatus",
     "ProofStatusEvaluation",
@@ -62,6 +73,9 @@ __all__ = [
     "RegimeAnalysisResult",
     "RegimeAnalyzer",
     "RegimeBucketMetrics",
+    "ResearchWarning",
+    "ResearchWarningCode",
+    "ResearchWarningDetector",
     "RuleEvaluationGate",
     "SensitivityGridCell",
     "StressScenarioResult",
