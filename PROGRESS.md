@@ -7,10 +7,10 @@ Before starting any work, the agent must have read `AGENTS.md`.
 All permanent rules (branching strategy, commit format, how to mark tasks, what the agent may and may not do) live in `AGENTS.md`.  
 This file only holds the milestones themselves.
 
-## M00 – Foundation 🔄 IN PROGRESS
+## M00 – Foundation ✅ COMPLETE
 
 **Branch:** `feat/m00-foundation`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 #### Tasks
 
@@ -33,10 +33,10 @@ This file only holds the milestones themselves.
 
 ---
 
-## M01 – Data Engine 🔄 IN PROGRESS
+## M01 – Data Engine ✅ COMPLETE
 
 **Branch:** `feat/m01-data-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 ### Context for the Agent
 
@@ -71,10 +71,10 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 
 ---
 
-## M02 – Label Engine 🔄 IN PROGRESS
+## M02 – Label Engine ✅ COMPLETE
 
 **Branch:** `feat/m02-label-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 ### Context for the Agent
 
@@ -113,9 +113,10 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 
 ---
 
-## M03 – Feature Engine
+## M03 – Feature Engine 🔄 IN PROGRESS
 
-**Branch:** `feat/m03-feature-engine`
+**Branch:** `feat/m03-feature-engine`  
+**Status:** Active – agent is working here
 
 ### Context for the Agent
 
