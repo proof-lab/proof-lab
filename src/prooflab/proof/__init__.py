@@ -26,6 +26,13 @@ from prooflab.proof.sensitivity import (
     ParameterSensitivityResult,
     SensitivityGridCell,
 )
+from prooflab.proof.status import (
+    ProofStatus,
+    ProofStatusEvaluation,
+    ProofStatusEvaluator,
+    ProofStatusThresholds,
+    RuleEvaluationGate,
+)
 from prooflab.proof.stress import (
     ExecutionStressAnalyzer,
     ExecutionStressConfig,
@@ -48,9 +55,14 @@ __all__ = [
     "ParameterSensitivityConfig",
     "ParameterSensitivityResult",
     "ProofScorecard",
+    "ProofStatus",
+    "ProofStatusEvaluation",
+    "ProofStatusEvaluator",
+    "ProofStatusThresholds",
     "RegimeAnalysisResult",
     "RegimeAnalyzer",
     "RegimeBucketMetrics",
+    "RuleEvaluationGate",
     "SensitivityGridCell",
     "StressScenarioResult",
     "YearlyPerformance",
