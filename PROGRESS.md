@@ -365,10 +365,10 @@ The equity curve is generated from the actual simulated account balance and must
 
 ---
 
-## M08 – Proof Engine & Robustness 🔄 IN PROGRESS
+## M08 – Proof Engine & Robustness ✅ COMPLETE
 
 **Branch:** `feat/m08-proof-robustness`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -402,12 +402,12 @@ Every completed experiment should produce a research report containing configura
 
 ### Human Review Checklist
 
-- [ ] Proof Status is determined by explicit rules
-- [ ] Monte Carlo produces the required percentile statistics
-- [ ] Sensitivity analysis flags fragile parameter choices
-- [ ] Regime analysis covers the required cases
-- [ ] Report is complete and evidence-based
-- [ ] Appropriate warnings are generated
+- [x] Proof Status is determined by explicit rules
+- [x] Monte Carlo produces the required percentile statistics
+- [x] Sensitivity analysis flags fragile parameter choices
+- [x] Regime analysis covers the required cases
+- [x] Report is complete and evidence-based
+- [x] Appropriate warnings are generated
 
 ---
 
