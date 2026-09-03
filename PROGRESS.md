@@ -189,7 +189,7 @@ A minimal training pipeline skeleton should execute: Load Dataset â†’ Validate â
 - [x] Define a common model interface
 - [x] Implement Random and Majority baselines
 - [x] Implement Logistic Regression baseline
-- [ ] Implement the XGBoost model with the required configurability
+- [x] Implement the XGBoost model with the required configurability
 - [ ] Implement the configurable PyTorch neural network with validation-only early stopping
 - [ ] Implement the SVM with probability estimates and training-fitted scaling
 - [ ] Implement artifact saving and loading that captures all required components
