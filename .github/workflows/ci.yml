@@ -48,8 +48,11 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install dev dependencies
-        run: pip install -e ".[dev]"
+      - name: Install CPU PyTorch
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install development and model dependencies
+        run: pip install -e ".[dev,ml]"
 
       - name: Run mypy
         run: mypy src/
@@ -60,6 +63,9 @@ jobs:
   test:
     name: Unit tests (pytest)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        extras: ["dev", "dev,ml"]
     steps:
       - uses: actions/checkout@v4
 
@@ -68,8 +74,21 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install dev dependencies
-        run: pip install -e ".[dev]"
+      - name: Install CPU PyTorch
+        if: matrix.extras == 'dev,ml'
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install dependencies
+        run: pip install -e ".[${{ matrix.extras }}]"
+
+      - name: Verify model dependencies are importable
+        if: matrix.extras == 'dev,ml'
+        run: python -c "import sklearn, xgboost, torch"
+
+      - name: Run core unit tests
+        if: matrix.extras == 'dev'
+        run: pytest tests/unit/ -q
 
       - name: Run unit tests with coverage
+        if: matrix.extras == 'dev,ml'
         run: pytest tests/unit/ -v --cov=prooflab --cov-report=term-missing
