@@ -116,7 +116,7 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 ## M03 – Feature Engine 🔄 IN PROGRESS
 
 **Branch:** `feat/m03-feature-engine`  
-**Status:** Active – agent is working here
+**Status:** Active – all tasks implemented, awaiting human review
 
 ### Context for the Agent
 
@@ -147,9 +147,9 @@ The same feature implementations will later be reused for live inference; there 
 - [x] Implement the volatility feature family
 - [x] Implement the trend feature family
 - [x] Implement cyclical time features
-- [ ] Build the feature pipeline with explicit lookback declarations and leakage guards
-- [ ] Handle warm-up rows and enforce fit/transform separation for any scalers
-- [ ] Write unit and property tests that prove absence of look-ahead bias for every family
+- [x] Build the feature pipeline with explicit lookback declarations and leakage guards
+- [x] Handle warm-up rows and enforce fit/transform separation for any scalers
+- [x] Write unit and property tests that prove absence of look-ahead bias for every family
 
 ### Human Review Checklist
 
