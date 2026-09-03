@@ -4,11 +4,13 @@ Models consume a finite numeric pandas DataFrame and canonical labels (-1, 0,
 1). Series labels must have exactly the same index as their feature rows; NumPy
 labels are positional. Feature names must be unique. Prediction accepts reordered
 columns but rejects missing or additional columns. Probability columns follow
-`model.classes_`, which contains only classes observed during training.
+`model.classes_`. Learned models use observed training classes; the deterministic
+rule uses its explicitly configured action vocabulary.
 
 The wrapper validates input schemas; the caller must establish chronological
 partitions and purge labels whose future observations cross partition boundaries.
-Do not pass blind data to `fit`. The integrated training pipeline is still pending.
+Do not pass blind data to `fit`. `prooflab.experiments.training` supplies the
+integrated chronological training workflow described below.
 
 ## Implemented models
 
@@ -25,8 +27,8 @@ Do not pass blind data to `fit`. The integrated training pipeline is still pendi
 ML models require `pip install -e ".[ml]"`. Core baselines do not require the ML
 extra. Configuration objects reject unknown settings and invalid parameter ranges;
 `get_params()` returns their versioned settings for persistence. Random and
-Majority support a single training class; the other implemented models require at
-least two. Majority ties select the smallest canonical class. Its probability
+Majority support a single training class, as does the deterministic rule; learned
+models require at least two. Majority ties select the smallest canonical class. Its probability
 output is the empirical training frequency, not one-hot certainty. Random outputs
 are successive seeded draws; refitting resets the sequence, and probability
 queries do not advance it.
@@ -99,3 +101,54 @@ Artifacts accept generated feature frames for inference. Raw market-data feature
 generation remains the responsibility of the existing feature engine and its
 recorded feature definitions. No strategy-package import, live execution, or
 ensemble behavior is provided here.
+
+## Chronological training pipeline
+
+Create a separate immutable research snapshot containing only observations before
+the chosen blind boundary. The pipeline checks version metadata before loading
+any observations and rejects snapshots extending into the blind period. It does
+not create that snapshot by opening a larger blind-containing dataset.
+
+Choose one `SetupConfig.direction` per run. Entry is at bar close so all selected
+bar features are available at entry. The pipeline rejects earlier entry-price
+columns that would make current-bar features future information. For ATR setup
+distances, explicitly include the registry's `atr_14` feature and set
+`atr_feature: atr_14`; ATR percentages are not accepted as price distances.
+
+Copy and edit `config/training.example.yaml`, then call the programmatic entry:
+
+```python
+from pathlib import Path
+import yaml
+
+from prooflab.data.repository import ParquetRepository
+from prooflab.experiments.training import TrainingConfig, run_training
+
+config = TrainingConfig.model_validate(
+    yaml.safe_load(Path("config/training.example.yaml").read_text())
+)
+result = run_training(
+    ParquetRepository("data/processed"), config, "artifacts/experiments/new-run"
+)
+print(result.report_path)
+```
+
+The output directory must be new. Each configured model is fitted independently;
+the pipeline performs no search, model selection, or ensembling. All fits finish
+before artifacts are written. A persistence failure raises an error and may leave
+an incomplete output directory; the final `training-report.json` identifies a
+successfully completed run.
+
+Full-horizon eligibility is determined before barrier outcomes: the last horizon
+bars of each partition are excluded even if their targets would have been hit
+early. Features use preceding history across the validation boundary, but fitted
+preprocessing uses only training rows. Warm-up, non-finite feature rows, and
+ambiguity-policy exclusions are counted explicitly; no imputation is performed.
+Labels, selected features, and full horizon ends retain aligned UTC timestamps.
+SVM receives those full horizon ends and applies its additional internal purge.
+
+The report contains real data-health diagnostics, retained label distributions,
+exclusion counts, exact configuration, and artifact paths. It contains no blind
+labels, predictions, or metrics. SVM probability subpartitions and their method
+are recorded in each SVM artifact's `fit_details`; model parameters, preprocessing,
+full feature definitions, and dataset identity accompany every artifact.
