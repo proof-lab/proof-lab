@@ -466,7 +466,7 @@ A strategy moves through explicit approval states: RESEARCH → VALIDATED → PA
 
 ### Tasks
 
-- [ ] Build the live market-data consumer with staleness, gap, duplicate and quality checks
+- [x] Build the live market-data consumer with staleness, gap, duplicate and quality checks
 - [ ] Ensure live feature calculation reuses the identical training code path
 - [ ] Implement inference that loads a complete model artifact and rejects incomplete ones
 - [ ] Implement paper execution and paper portfolio accounting
