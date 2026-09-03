@@ -471,7 +471,7 @@ A strategy moves through explicit approval states: RESEARCH → VALIDATED → PA
 - [x] Implement inference that loads a complete model artifact and rejects incomplete ones
 - [x] Implement paper execution and paper portfolio accounting
 - [x] Record paper trades with the full trade schema
-- [ ] Write an integration test of the complete paper-trading loop
+- [x] Write an integration test of the complete paper-trading loop
 
 ### Human Review Checklist
 
