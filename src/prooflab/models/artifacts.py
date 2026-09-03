@@ -69,7 +69,7 @@ class ArtifactManifest(BaseModel):
     feature_schema: dict[str, str]
     feature_metadata: list[FeatureMetadata]
     classes: list[int]
-    preprocessing: Literal["identity", "pipeline", "preprocessor"]
+    preprocessing: Literal["identity", "pipeline", "preprocessor", "ensemble"]
     training: TrainingMetadata
     training_history: list[dict[str, Any]] = Field(default_factory=list)
     fit_details: dict[str, Any] = Field(default_factory=dict)
@@ -110,6 +110,8 @@ def _artifact_path(path: Path | str) -> Path:
 
 
 def _preprocessing(model: BaseModelWrapper) -> str:
+    if model.model_name in {"directional_ensemble", "calibrated_ensemble"}:
+        return "ensemble"
     if getattr(model, "pipeline", None) is not None:
         return "pipeline"
     if getattr(model, "preprocessor", None) is not None:
@@ -127,7 +129,15 @@ def _dependencies(model: BaseModelWrapper) -> dict[str, str]:
         packages.append("xgboost")
     if model.model_name == "neural_network":
         packages.append("torch")
-    return {"python": platform.python_version(), **{name: version(name) for name in packages}}
+    dependencies = {"python": platform.python_version(),
+                    **{name: version(name) for name in packages}}
+    for artifact in getattr(model, "_members", {}).values():
+        dependencies.update(_dependencies(artifact.model))
+    if model.model_name == "calibrated_ensemble":
+        dependencies.update(_dependencies(model._ensemble))  # type: ignore[attr-defined]
+        dependencies["scipy"] = version("scipy")
+        dependencies["scikit-learn"] = version("scikit-learn")
+    return dependencies
 
 
 def save_artifact(

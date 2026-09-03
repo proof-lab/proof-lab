@@ -217,4 +217,64 @@ All M04 tasks are committed and ready for human review.
 
 ---
 
+## M05 – Ensemble & Calibration
+
+**Branch:** `feat/m05-ensemble-calibration`
+
+### Context for the Agent
+
+Individual models are available. They must now be combined and their outputs turned into well-calibrated probabilities.
+
+The ensemble must support hard voting (required for compatibility) as well as probability averaging and weighted probability averaging; stacking may be added later. The application must not assume hard voting is inherently superior.
+
+Raw probabilities must be optionally calibrated with Platt scaling or isotonic regression. Calibration is fitted only on training/validation data; the blind test set remains untouched. Calibration quality should be measured with Brier score, log loss, calibration curve and expected calibration error.
+
+“Confidence” is defined strictly as the calibrated probability of the predicted class. It must never be merely the number of models that agree. Model agreement may be displayed separately.
+
+Every prediction must conform to this schema:
+
+```json
+{
+  "timestamp": "...",
+  "symbol": "EURUSD",
+  "prediction": "BUY",
+  "probabilities": {
+    "BUY": 0.72,
+    "SELL": 0.08,
+    "IGNORE": 0.2
+  },
+  "model_votes": {
+    "xgboost": "BUY",
+    "neural_network": "BUY",
+    "svm": "IGNORE"
+  }
+}
+```
+
+### Approved M05 implementation decision
+
+M05 keeps separate long and short ensembles, continuing the M04 one-model-per-configured-direction choice. Long ensembles emit BUY or IGNORE with SELL probability zero; short ensembles emit SELL or IGNORE with BUY probability zero in the required three-class output schema. M05 does not train a joint long/short three-class model. Formal Platt/isotonic calibration uses chronologically valid pre-blind data only; the blind period remains untouched. This formal M05 calibration is distinct from the narrow M04 native-style SVM probability-estimation exception.
+
+### Tasks
+
+- [x] Implement hard voting
+- [x] Implement probability averaging
+- [x] Implement weighted probability averaging
+- [x] Implement Platt scaling calibration
+- [x] Implement isotonic regression calibration
+- [x] Produce the exact ensemble prediction schema shown above
+- [x] Ensure confidence is the calibrated probability of the predicted class
+- [x] Write tests for all combination and calibration methods
+
+### Human Review Checklist
+
+- [x] Calibration is fitted only on train/validation data
+- [x] Blind test set is never used for calibration
+- [x] Output schema matches the specification exactly
+- [x] Confidence is never just vote count
+- [x] Model votes remain available separately
+- [x] Methods are selectable via configuration
+
+---
+
 _End of current work._
