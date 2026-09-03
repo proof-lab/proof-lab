@@ -300,7 +300,7 @@ The system must track the number of experiments performed and warn when many exp
 - [x] Implement purging
 - [x] Implement embargo logic (length ≥ label horizon)
 - [x] Build the leakage detector and prove it catches synthetic leaking cases
-- [ ] Create the experiment registry with full reproducibility metadata
+- [x] Create the experiment registry with full reproducibility metadata
 - [ ] Protect the blind test set from casual inspection and multiple-testing abuse
 
 ### Human Review Checklist
