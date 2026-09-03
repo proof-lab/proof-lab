@@ -184,6 +184,14 @@ All models share a common interface. Every trained model is stored as an artifac
 
 A minimal training pipeline skeleton should execute: Load Dataset → Validate → Generate Labels → Generate Features → Remove warm-up rows → Chronological Split → Fit Preprocessors on Training Only → Train models → Persist Artifact.
 
+### Approved M04 implementation decisions
+
+- **SVM probability estimation (M04 compatibility exception):** Fit the SVM and its scaler on an earlier training subpartition. Fit only the SVM-specific probability-estimation mechanism on a later training subpartition after purging every earlier sample whose complete label horizon reaches that subpartition. Do not refit the SVM or scaler on the probability-fitting rows. The ordinary validation partition and blind period are unavailable to probability fitting. This replaces the native mechanism's shuffled internal folds with an explicit chronological holdout. Record both subpartitions, the purge, and the probability method in the artifact.
+- **M04 versus M05:** The exception is restricted to making the SVM's required native-style probability interface functional. It does not introduce a reusable calibration framework, model-wide post-processing, calibration-method comparison or selection, or claims that probabilities are formally calibrated. Formal Platt/isotonic calibration and its evaluation remain deferred to M05. The existing human review item about calibration is interpreted subject only to this explicitly approved SVM exception; its checkbox remains for the human reviewer.
+- **Setup directions and split eligibility:** Train separate models for each explicitly configured setup direction. Retain a sample only when its complete future horizon lies within its permitted partition, even when a barrier happens to be reached sooner. Apply this rule at training/validation boundaries and inside SVM training. This prevents later observations from influencing earlier samples or their eligibility through outcomes.
+- **Blind-period isolation:** M04 training accepts explicit chronological boundaries and loads only observations before the blind boundary. Do not generate blind labels or features, evaluate blind predictions, select parameters from the blind period, or produce blind metrics. The blind period remains untouched.
+- **Simple Rule baseline:** Add a separate deterministic task with explicitly supplied indicator thresholds and direction. Learn no thresholds and apply no probability fitting or implicit calibration. Any probability-shaped output is a one-hot encoding of the deterministic action, not an estimated probability of setup success.
+
 ### Tasks
 
 - [x] Define a common model interface
@@ -192,6 +200,7 @@ A minimal training pipeline skeleton should execute: Load Dataset → Validate �
 - [x] Implement the XGBoost model with the required configurability
 - [x] Implement the configurable PyTorch neural network with validation-only early stopping
 - [ ] Implement the SVM with probability estimates and training-fitted scaling
+- [ ] Implement the deterministic Simple Rule baseline with explicitly configured thresholds
 - [x] Implement artifact saving and loading that captures all required components
 - [ ] Create the minimal training pipeline skeleton that respects chronological order and preprocessor rules
 
