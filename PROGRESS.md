@@ -277,9 +277,10 @@ M05 keeps separate long and short ensembles, continuing the M04 one-model-per-co
 
 ---
 
-## M06 – Validation Framework
+## M06 – Validation Framework 🔄 IN PROGRESS
 
-**Branch:** `feat/m06-validation-framework`
+**Branch:** `feat/m06-validation-framework`  
+**Status:** Active – all tasks implemented, awaiting human review
 
 ### Context for the Agent
 
@@ -301,7 +302,9 @@ The system must track the number of experiments performed and warn when many exp
 - [x] Implement embargo logic (length ≥ label horizon)
 - [x] Build the leakage detector and prove it catches synthetic leaking cases
 - [x] Create the experiment registry with full reproducibility metadata
-- [ ] Protect the blind test set from casual inspection and multiple-testing abuse
+- [x] Protect the blind test set from casual inspection and multiple-testing abuse
+
+All M06 tasks are committed and ready for human review.
 
 ### Human Review Checklist
 
