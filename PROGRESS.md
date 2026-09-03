@@ -411,10 +411,10 @@ Every completed experiment should produce a research report containing configura
 
 ---
 
-## M09 – Risk Engine 🔄 IN PROGRESS
+## M09 – Risk Engine ✅ COMPLETE
 
 **Branch:** `feat/m09-risk-engine`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -439,11 +439,11 @@ Position sizing remains risk-based as defined earlier. All of these controls mus
 
 ### Human Review Checklist
 
-- [ ] Risk engine can reject BUY/SELL signals
-- [ ] Kill switch persists state and emits an audit event
-- [ ] Daily loss limit disables new trades
-- [ ] All required limits are present and enforced
-- [ ] No live broker code has been introduced
+- [x] Risk engine can reject BUY/SELL signals
+- [x] Kill switch persists state and emits an audit event
+- [x] Daily loss limit disables new trades
+- [x] All required limits are present and enforced
+- [x] No live broker code has been introduced
 
 ---
 
