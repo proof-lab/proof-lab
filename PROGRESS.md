@@ -277,10 +277,10 @@ M05 keeps separate long and short ensembles, continuing the M04 one-model-per-co
 
 ---
 
-## M06 – Validation Framework 🔄 IN PROGRESS
+## M06 – Validation Framework ✅ COMPLETE
 
 **Branch:** `feat/m06-validation-framework`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Human review approved – ready for merge into `development`
 
 ### Context for the Agent
 
@@ -304,16 +304,14 @@ The system must track the number of experiments performed and warn when many exp
 - [x] Create the experiment registry with full reproducibility metadata
 - [x] Protect the blind test set from casual inspection and multiple-testing abuse
 
-All M06 tasks are committed and ready for human review.
-
 ### Human Review Checklist
 
-- [ ] Random splitting is impossible on the primary evaluation path
-- [ ] Blind test period is fully isolated
-- [ ] Embargo length is at least the label horizon
-- [ ] Leakage detector works on the constructed examples
-- [ ] Reproducibility metadata is complete
-- [ ] No backtesting or risk logic has been added
+- [x] Random splitting is impossible on the primary evaluation path
+- [x] Blind test period is fully isolated
+- [x] Embargo length is at least the label horizon
+- [x] Leakage detector works on the constructed examples
+- [x] Reproducibility metadata is complete
+- [x] No backtesting or risk logic has been added
 
 ---
 
