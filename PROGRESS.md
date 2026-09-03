@@ -266,6 +266,8 @@ M05 keeps separate long and short ensembles, continuing the M04 one-model-per-co
 - [x] Ensure confidence is the calibrated probability of the predicted class
 - [x] Write tests for all combination and calibration methods
 
+All M05 tasks are committed and ready for human review.
+
 ### Human Review Checklist
 
 - [ ] Calibration is fitted only on train/validation data
