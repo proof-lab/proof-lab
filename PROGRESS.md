@@ -469,8 +469,8 @@ A strategy moves through explicit approval states: RESEARCH → VALIDATED → PA
 - [x] Build the live market-data consumer with staleness, gap, duplicate and quality checks
 - [x] Ensure live feature calculation reuses the identical training code path
 - [x] Implement inference that loads a complete model artifact and rejects incomplete ones
-- [ ] Implement paper execution and paper portfolio accounting
-- [ ] Record paper trades with the full trade schema
+- [x] Implement paper execution and paper portfolio accounting
+- [x] Record paper trades with the full trade schema
 - [ ] Write an integration test of the complete paper-trading loop
 
 ### Human Review Checklist
