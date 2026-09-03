@@ -264,7 +264,7 @@ M05 keeps separate long and short ensembles, continuing the M04 one-model-per-co
 - [x] Implement isotonic regression calibration
 - [x] Produce the exact ensemble prediction schema shown above
 - [x] Ensure confidence is the calibrated probability of the predicted class
-- [ ] Write tests for all combination and calibration methods
+- [x] Write tests for all combination and calibration methods
 
 ### Human Review Checklist
 
