@@ -433,7 +433,7 @@ Position sizing remains risk-based as defined earlier. All of these controls mus
 - [x] Implement risk-based position sizing
 - [x] Implement the full set of exposure, loss and consecutive-loss limits
 - [x] Implement maximum daily and weekly loss handling
-- [ ] Implement the kill switch with the required behaviour and audit event
+- [x] Implement the kill switch with the required behaviour and audit event
 - [ ] Implement the safety-condition checks that automatically pause trading
 - [ ] Write tests proving that risk rules can reject any model signal
 
