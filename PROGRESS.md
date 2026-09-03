@@ -277,4 +277,41 @@ M05 keeps separate long and short ensembles, continuing the M04 one-model-per-co
 
 ---
 
+## M06 – Validation Framework
+
+**Branch:** `feat/m06-validation-framework`
+
+### Context for the Agent
+
+Random train/test splits are forbidden for the primary evaluation path. Proof Lab requires chronological splitting and walk-forward validation. A final blind test period (default: the last two years of data) is held out completely. It may never be used for feature selection, hyperparameter selection, model selection, threshold selection, strategy selection, calibration or manual tuning.
+
+Walk-forward may be expanding or rolling; the exact periods are configurable. Because labels look into the future, overlapping observations can create dependence between train and test samples. The validation engine must therefore support purging and embargo periods. The embargo must be at least as long as the maximum target horizon where appropriate.
+
+A leakage detector is required. The test suite must contain deliberately constructed datasets in which leakage would produce an obvious performance improvement; the detector must identify those cases.
+
+Every experiment receives a unique ID (format PL-YYYY-XXXXXX) and must record: experiment_id, dataset_id, full strategy/feature/model/validation/execution configuration, random seed, software version, git commit, created_at, results and artifact locations. Reproducibility also requires recording Python version, library versions, dataset checksum, feature version and label version.
+
+The system must track the number of experiments performed and warn when many experiments have been run against the same validation period. The blind test set should be protected from casual repeated inspection; revealing full blind-test results may require explicit confirmation.
+
+### Tasks
+
+- [ ] Implement chronological train / validation / blind-test splitting
+- [ ] Implement expanding and rolling walk-forward generators
+- [ ] Implement purging
+- [ ] Implement embargo logic (length ≥ label horizon)
+- [ ] Build the leakage detector and prove it catches synthetic leaking cases
+- [ ] Create the experiment registry with full reproducibility metadata
+- [ ] Protect the blind test set from casual inspection and multiple-testing abuse
+
+### Human Review Checklist
+
+- [ ] Random splitting is impossible on the primary evaluation path
+- [ ] Blind test period is fully isolated
+- [ ] Embargo length is at least the label horizon
+- [ ] Leakage detector works on the constructed examples
+- [ ] Reproducibility metadata is complete
+- [ ] No backtesting or risk logic has been added
+
+---
+
 _End of current work._
