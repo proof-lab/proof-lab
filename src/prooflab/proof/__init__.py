@@ -10,6 +10,12 @@ from prooflab.proof.monte_carlo import (
     MonteCarloEngine,
     MonteCarloResult,
 )
+from prooflab.proof.regime import (
+    RegimeAnalysisResult,
+    RegimeAnalyzer,
+    RegimeBucketMetrics,
+    YearlyPerformance,
+)
 from prooflab.proof.scorecard import (
     EquityCurveData,
     ProofScorecard,
@@ -42,6 +48,10 @@ __all__ = [
     "ParameterSensitivityConfig",
     "ParameterSensitivityResult",
     "ProofScorecard",
+    "RegimeAnalysisResult",
+    "RegimeAnalyzer",
+    "RegimeBucketMetrics",
     "SensitivityGridCell",
     "StressScenarioResult",
+    "YearlyPerformance",
 ]
