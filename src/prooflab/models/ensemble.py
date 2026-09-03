@@ -12,7 +12,7 @@ from typing import Any, Literal, Self
 
 import numpy as np
 import pandas as pd
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime, BaseModel, ConfigDict, model_validator
 
 from prooflab.labels.config import Direction, SetupConfig
 from prooflab.models.artifacts import ModelArtifact
@@ -25,8 +25,19 @@ class EnsembleConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
     version: Literal[1] = 1
     direction: Direction
-    method: Literal["hard_vote", "probability_average"] = "hard_vote"
+    method: Literal["hard_vote", "probability_average", "weighted_average"] = "hard_vote"
     blind_start: AwareDatetime
+    weights: dict[str, float] | None = None
+
+    @model_validator(mode="after")
+    def validate_weights(self) -> EnsembleConfig:
+        if self.method == "weighted_average":
+            if (not self.weights or any(value < 0 for value in self.weights.values())
+                    or not any(value > 0 for value in self.weights.values())):
+                raise ValueError("Weights must be nonnegative with at least one positive value.")
+        elif self.weights is not None:
+            raise ValueError("Weights are only valid for weighted_average.")
+        return self
 
 
 @dataclass(frozen=True)
@@ -47,6 +58,8 @@ class DirectionalEnsemble(BaseModelWrapper):
             raise ValueError("An ensemble requires named members.")
         self.config = config.model_copy(deep=True)
         self._members = deepcopy(members)
+        if config.weights is not None and set(config.weights) != set(members):
+            raise ValueError("Weights must name every member exactly once.")
         self.classes_ = sorted([0, self.action])
         first = next(iter(self._members.values()))
         self.setup = SetupConfig.model_validate(first.manifest.training.setup_config)
@@ -127,14 +140,19 @@ class DirectionalEnsemble(BaseModelWrapper):
         votes = {name: artifact.model.predict(aligned)
                  for name, artifact in self._members.items()}
         action_score = np.mean([vote == self.action for vote in votes.values()], axis=0)
-        if self.config.method == "probability_average":
+        if self.config.method != "hard_vote":
             member_scores = []
             for artifact in self._members.values():
                 model = artifact.model
                 proba = model.predict_proba(aligned)
                 member_scores.append(proba[:, model.classes_.index(self.action)]
                                      if self.action in model.classes_ else np.zeros(len(aligned)))
-            action_score = np.mean(member_scores, axis=0)
+            weights = np.ones(len(self._members)) if self.config.weights is None else np.array([
+                self.config.weights[name] for name in self._members
+            ])
+            # Rescale before summing to avoid overflow for large finite weights.
+            weights = weights / weights.max()
+            action_score = np.average(member_scores, axis=0, weights=weights)
         probabilities = np.column_stack([
             action_score if cls == self.action else 1 - action_score for cls in self.classes_
         ])

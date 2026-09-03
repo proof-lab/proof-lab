@@ -126,3 +126,34 @@ def test_missing_action_class_is_zero_padded(member_factory):
     member = ModelArtifact(member.model, member.manifest.model_copy(update={"classes": [0]}))
     ensemble = DirectionalEnsemble({"a": member}, config(method="probability_average"))
     np.testing.assert_array_equal(ensemble.predict_proba(pd.DataFrame({"signal": [1.]})), [[1, 0]])
+
+
+@pytest.mark.parametrize("action,direction", [(1, "LONG"), (-1, "SHORT")])
+def test_weighted_average_named_weights_and_extreme_values(member_factory, action, direction):
+    members = {"a": member_factory(action, 0.2), "b": member_factory(action, 0.8)}
+    cfg = config(direction, method="weighted_average", weights={"b": 3e307, "a": 1e307})
+    ensemble = DirectionalEnsemble(members, cfg)
+    result = ensemble.evaluate(pd.DataFrame({"signal": [1.]}))
+    assert result.probabilities[0, ensemble.classes_.index(action)] == pytest.approx(0.65)
+    assert result.predictions[0] == action
+    cfg.weights["a"] = 3e307
+    assert ensemble.get_params()["weights"]["a"] == 1e307
+
+
+@pytest.mark.parametrize("weights", [{}, {"a": 0}, {"a": -1}, {"a": float("nan")},
+                                     {"a": float("inf")}])
+def test_invalid_weights(weights):
+    with pytest.raises(ValueError):
+        config(method="weighted_average", weights=weights)
+
+
+def test_weight_configuration_and_zero_weight(member_factory):
+    with pytest.raises(ValueError, match="only valid"):
+        config(weights={"a": 1})
+    with pytest.raises(ValueError, match="every member"):
+        DirectionalEnsemble({"a": member_factory()}, config(method="weighted_average",
+                                                           weights={"b": 1}))
+    ensemble = DirectionalEnsemble({"a": member_factory(probability=0.1),
+                                   "b": member_factory(probability=0.9)},
+                                  config(method="weighted_average", weights={"a": 0, "b": 2}))
+    assert ensemble.predict_proba(pd.DataFrame({"signal": [1.]}))[0, 1] == pytest.approx(0.9)
