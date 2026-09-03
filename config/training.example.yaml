@@ -1,0 +1,34 @@
+# Illustrative schema example. Replace the dataset id, boundaries, and setup
+# settings with those explicitly chosen for your research run.
+version: 1
+dataset_id: replace-with-pre-blind-dataset-id
+validation_start: "2020-07-01T00:00:00Z"
+blind_start: "2020-10-01T00:00:00Z"
+setup:
+  direction: LONG
+  target_distance: 1.0
+  stop_distance: 1.0
+  unit: POINTS
+  point_value: 1.0
+  horizon_bars: 3
+  ambiguity_policy: CONSERVATIVE
+  entry_price_col: close
+feature_names: [return_1, range_1]
+models:
+  - kind: random
+    parameters: {strategy: prior, random_state: 42}
+  - kind: majority
+  - kind: logistic
+  - kind: xgboost
+  - kind: neural
+  - kind: svm
+    parameters:
+      probability_start: "2020-05-01T00:00:00Z"
+      training_end: "2020-07-01T00:00:00Z"
+  - kind: simple_rule
+    parameters:
+      feature_col: return_1
+      lower_threshold: -0.005
+      upper_threshold: 0.005
+      direction: LONG
+      mode: momentum

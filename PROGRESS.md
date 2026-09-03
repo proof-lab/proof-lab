@@ -113,10 +113,10 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 
 ---
 
-## M03 – Feature Engine 🔄 IN PROGRESS
+## M03 – Feature Engine ✅ COMPLETE
 
 **Branch:** `feat/m03-feature-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 ### Context for the Agent
 
@@ -160,6 +160,60 @@ The same feature implementations will later be reused for live inference; there 
 - [x] Core families required by the MVP are present
 - [x] Tests demonstrate no leakage
 - [x] Microstructure features are not fabricated from OHLCV alone
+
+---
+
+## M04 – Model Engine 🔄 IN PROGRESS
+
+**Branch:** `feat/m04-model-engine`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+Proof Lab trains multiple models so their combination can later be evaluated. Before the main ensemble is judged, simple baselines are required so we can measure whether complexity actually adds value.
+
+Required baselines: Random Classifier, Majority Classifier, Logistic Regression, Simple Rule Strategy, XGBoost-only.
+
+Core models:
+
+- **XGBoost** (“Rule-Maker”): configurable tree depth, learning rate, number of estimators, subsampling, column sampling, regularization, class weights. Hyperparameter tuning may use only training/validation data.
+- **PyTorch Neural Network**: configurable architecture (hidden layers, units, dropout, learning rate, batch size, epochs, weight decay). Early stopping must use validation data only. Initial shape is Input → Dense → ReLU → Dropout → Dense → ReLU → Dropout → Output.
+- **SVM** (“Statistician”): configurable kernel, C, gamma, class weights, probability estimation. Feature scaling must be performed through a pipeline fitted only on training data.
+
+All models share a common interface. Every trained model is stored as an artifact that must contain at least: model weights, preprocessor, feature schema, feature order, training metadata. The blind test set must never be used for tuning or early stopping.
+
+A minimal training pipeline skeleton should execute: Load Dataset → Validate → Generate Labels → Generate Features → Remove warm-up rows → Chronological Split → Fit Preprocessors on Training Only → Train models → Persist Artifact.
+
+### Approved M04 implementation decisions
+
+- **SVM probability estimation (M04 compatibility exception):** Fit the SVM and its scaler on an earlier training subpartition. Fit only the SVM-specific probability-estimation mechanism on a later training subpartition after purging every earlier sample whose complete label horizon reaches that subpartition. Do not refit the SVM or scaler on the probability-fitting rows. The ordinary validation partition and blind period are unavailable to probability fitting. This replaces the native mechanism's shuffled internal folds with an explicit chronological holdout. Record both subpartitions, the purge, and the probability method in the artifact.
+- **M04 versus M05:** The exception is restricted to making the SVM's required native-style probability interface functional. It does not introduce a reusable calibration framework, model-wide post-processing, calibration-method comparison or selection, or claims that probabilities are formally calibrated. Formal Platt/isotonic calibration and its evaluation remain deferred to M05. The existing human review item about calibration is interpreted subject only to this explicitly approved SVM exception; its checkbox remains for the human reviewer.
+- **Setup directions and split eligibility:** Train separate models for each explicitly configured setup direction. Retain a sample only when its complete future horizon lies within its permitted partition, even when a barrier happens to be reached sooner. Apply this rule at training/validation boundaries and inside SVM training. This prevents later observations from influencing earlier samples or their eligibility through outcomes.
+- **Blind-period isolation:** M04 training accepts explicit chronological boundaries and loads only observations before the blind boundary. Do not generate blind labels or features, evaluate blind predictions, select parameters from the blind period, or produce blind metrics. The blind period remains untouched.
+- **Simple Rule baseline:** Add a separate deterministic task with explicitly supplied indicator thresholds and direction. Learn no thresholds and apply no probability fitting or implicit calibration. Any probability-shaped output is a one-hot encoding of the deterministic action, not an estimated probability of setup success.
+
+### Tasks
+
+- [x] Define a common model interface
+- [x] Implement Random and Majority baselines
+- [x] Implement Logistic Regression baseline
+- [x] Implement the XGBoost model with the required configurability
+- [x] Implement the configurable PyTorch neural network with validation-only early stopping
+- [x] Implement the SVM with probability estimates and training-fitted scaling
+- [x] Implement the deterministic Simple Rule baseline with explicitly configured thresholds
+- [x] Implement artifact saving and loading that captures all required components
+- [x] Create the minimal training pipeline skeleton that respects chronological order and preprocessor rules
+
+All M04 tasks are committed and ready for human review.
+
+### Human Review Checklist
+
+- [x] All models implement the same interface
+- [x] Tuning and early stopping cannot see the blind test set
+- [x] Artifacts contain everything needed for later inference
+- [x] Baselines are present and functional
+- [x] No ensemble or calibration logic has been added yet
+- [x] Training remains free of future information
 
 ---
 
