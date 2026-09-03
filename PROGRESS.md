@@ -435,7 +435,7 @@ Position sizing remains risk-based as defined earlier. All of these controls mus
 - [x] Implement maximum daily and weekly loss handling
 - [x] Implement the kill switch with the required behaviour and audit event
 - [x] Implement the safety-condition checks that automatically pause trading
-- [ ] Write tests proving that risk rules can reject any model signal
+- [x] Write tests proving that risk rules can reject any model signal
 
 ### Human Review Checklist
 
