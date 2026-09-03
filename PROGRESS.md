@@ -7,10 +7,10 @@ Before starting any work, the agent must have read `AGENTS.md`.
 All permanent rules (branching strategy, commit format, how to mark tasks, what the agent may and may not do) live in `AGENTS.md`.  
 This file only holds the milestones themselves.
 
-## M00 – Foundation 🔄 IN PROGRESS
+## M00 – Foundation ✅ COMPLETE
 
 **Branch:** `feat/m00-foundation`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 #### Tasks
 
@@ -33,10 +33,10 @@ This file only holds the milestones themselves.
 
 ---
 
-## M01 – Data Engine 🔄 IN PROGRESS
+## M01 – Data Engine ✅ COMPLETE
 
 **Branch:** `feat/m01-data-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 ### Context for the Agent
 
@@ -71,10 +71,10 @@ Every dataset must have: dataset_id, source, symbol, timeframe, start_time, end_
 
 ---
 
-## M02 – Label Engine 🔄 IN PROGRESS
+## M02 – Label Engine ✅ COMPLETE
 
 **Branch:** `feat/m02-label-engine`  
-**Status:** Active – all tasks implemented, awaiting human review
+**Status:** Merged into `development`
 
 ### Context for the Agent
 
@@ -110,6 +110,56 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 - [x] Quality report matches the required content
 - [x] All critical test cases pass
 - [x] No feature or model code has been added
+
+---
+
+## M03 – Feature Engine 🔄 IN PROGRESS
+
+**Branch:** `feat/m03-feature-engine`  
+**Status:** Active – all tasks implemented, awaiting human review
+
+### Context for the Agent
+
+Once labels exist, the system needs quantitative features that describe market state at each point in time without ever looking into the future.
+
+Features are organised into families:
+
+- **Price**: return_1/2/3/6/12/24, range_1/3/6/12, body_size, upper_wick, lower_wick, distance_from_high/low, close_to_open/high/low
+- **Momentum**: RSI, ROC, MACD, MACD_signal, MACD_histogram, momentum_3/6/12
+- **Volatility**: ATR, ATR_percent, rolling_std, rolling_range, true_range, volatility_percentile
+- **Trend**: EMA_fast/slow, EMA_distance, SMA_fast/slow, ADX, trend_slope (all parameters configurable)
+- **Time**: cyclical encoding – hour_sin/cos = sin/cos(2π · hour / 24), dow_sin/cos = sin/cos(2π · day / 7)
+- **Microstructure** (only when the required data exists, never faked from OHLCV): bid_ask_spread, spread_percentile, tick_count, tick_rate, short-term volatility/range, price acceleration, tick_volume_change
+
+Every feature must carry metadata: feature_name, family, description, parameters, required_columns, lookback_period, uses_future_data, version. Every feature generator must declare its maximum lookback. The framework should reject suspicious future dependencies.
+
+A feature is valid at time t only if all required information was available at t. Scaling and other preprocessing statistics must be fitted only on training data and then applied to validation and test data; they must never be fitted on the entire dataset. Warm-up rows (where the lookback is not yet satisfied) must be handled correctly.
+
+The system must support experiment modes that compare feature families: Price only, Price+Volatility, Price+Momentum, Price+Volatility+Momentum, All Standard Features, All Standard + Microstructure.
+
+The same feature implementations will later be reused for live inference; there must be only one code path.
+
+### Tasks
+
+- [x] Create the feature metadata system and registry
+- [x] Implement the price feature family
+- [x] Implement the momentum feature family
+- [x] Implement the volatility feature family
+- [x] Implement the trend feature family
+- [x] Implement cyclical time features
+- [x] Build the feature pipeline with explicit lookback declarations and leakage guards
+- [x] Handle warm-up rows and enforce fit/transform separation for any scalers
+- [x] Write unit and property tests that prove absence of look-ahead bias for every family
+
+### Human Review Checklist
+
+- [x] Every feature declares its maximum lookback
+- [x] No feature can access future data
+- [x] Scalers are fitted only on training data
+- [x] Metadata is complete for every feature
+- [x] Core families required by the MVP are present
+- [x] Tests demonstrate no leakage
+- [x] Microstructure features are not fabricated from OHLCV alone
 
 ---
 
