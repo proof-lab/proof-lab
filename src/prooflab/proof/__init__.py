@@ -5,6 +5,11 @@ from prooflab.proof.importance import (
     FeatureImportanceEntry,
     FeatureImportanceResult,
 )
+from prooflab.proof.monte_carlo import (
+    MonteCarloConfig,
+    MonteCarloEngine,
+    MonteCarloResult,
+)
 from prooflab.proof.scorecard import (
     EquityCurveData,
     ProofScorecard,
@@ -30,6 +35,9 @@ __all__ = [
     "FeatureImportanceAnalyzer",
     "FeatureImportanceEntry",
     "FeatureImportanceResult",
+    "MonteCarloConfig",
+    "MonteCarloEngine",
+    "MonteCarloResult",
     "ParameterSensitivityAnalyzer",
     "ParameterSensitivityConfig",
     "ParameterSensitivityResult",
