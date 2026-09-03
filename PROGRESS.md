@@ -447,4 +447,40 @@ Position sizing remains risk-based as defined earlier. All of these controls mus
 
 ---
 
+## M10 – Paper Trading 🔄 IN PROGRESS
+
+**Branch:** `feat/m10-paper-trading`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+Paper trading must precede live trading. The architecture is:
+
+Live Market Data → Feature Engine → Model → Risk Engine → Paper Execution → Portfolio
+
+The live feature engine must reuse the exact same feature implementations used during training. There must never be a separate “live RSI” versus “training RSI”. Every model artifact must include feature schema, feature order, preprocessing pipeline, model, calibration model and strategy parameters; the inference engine must reject an artifact if required features are missing.
+
+Live market data handling must detect stale ticks, missing ticks, duplicate ticks, out-of-order ticks and abnormal spreads. Paper trades are recorded with the same schema as live trades.
+
+A strategy moves through explicit approval states: RESEARCH → VALIDATED → PAPER_TRADING → APPROVED → LIVE_ENABLED → SUSPENDED → RETIRED. A strategy must never become live-enabled automatically. Live trading remains disabled by default.
+
+### Tasks
+
+- [ ] Build the live market-data consumer with staleness, gap, duplicate and quality checks
+- [ ] Ensure live feature calculation reuses the identical training code path
+- [ ] Implement inference that loads a complete model artifact and rejects incomplete ones
+- [ ] Implement paper execution and paper portfolio accounting
+- [ ] Record paper trades with the full trade schema
+- [ ] Write an integration test of the complete paper-trading loop
+
+### Human Review Checklist
+
+- [ ] Feature code path is identical to training
+- [ ] Incomplete artifacts are rejected
+- [ ] Paper trades are fully recorded with the same schema as live trades
+- [ ] No real broker orders can be sent from this code
+- [ ] Bad or stale data pauses trading
+
+---
+
 _End of current work._
