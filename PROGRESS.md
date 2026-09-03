@@ -390,8 +390,8 @@ Every completed experiment should produce a research report containing configura
 
 ### Tasks
 
-- [ ] Build the Proof Engine scorecard
-- [ ] Produce equity-curve and drawdown data
+- [x] Build the Proof Engine scorecard
+- [x] Produce equity-curve and drawdown data
 - [ ] Calculate global feature importance
 - [ ] Implement parameter sensitivity tests
 - [ ] Implement spread and slippage stress tests
