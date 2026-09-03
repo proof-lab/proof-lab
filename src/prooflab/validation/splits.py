@@ -11,7 +11,7 @@ import hashlib
 from typing import Any, Literal
 
 import pandas as pd
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 
 class SplitConfig(BaseModel):
@@ -37,6 +37,23 @@ class FoldPlan(BaseModel):
     dataset_end: AwareDatetime
     timeline_checksum: str
     configuration: dict[str, Any]
+
+
+class WalkForwardConfig(SplitConfig):
+    """Window lengths count observations, not elapsed days across market closures."""
+
+    mode: Literal["expanding", "rolling"] = "expanding"
+    validation_bars: int = Field(ge=1, strict=True)
+    step_bars: int | None = Field(default=None, ge=1, strict=True)
+    training_bars: int | None = Field(default=None, ge=1, strict=True)
+
+    @model_validator(mode="after")
+    def valid_windows(self) -> WalkForwardConfig:
+        if self.mode == "rolling" and self.training_bars is None:
+            raise ValueError("Rolling validation requires training_bars.")
+        if self.step_bars is not None and self.step_bars < self.validation_bars:
+            raise ValueError("Walk-forward validation windows must not overlap.")
+        return self
 
 
 def blind_boundary(config: SplitConfig, dataset_end: pd.Timestamp) -> pd.Timestamp:
@@ -87,3 +104,27 @@ def chronological_split(
     validate_timeline(index, blind)
     boundary = int(index.searchsorted(pd.Timestamp(config.validation_start)))
     return _plan(index, config, dataset_end, blind, 0, boundary, len(index), 0)
+
+
+def walk_forward(
+    index: pd.DatetimeIndex, config: WalkForwardConfig, *, dataset_end: pd.Timestamp,
+) -> tuple[FoldPlan, ...]:
+    """Generate complete expanding/rolling research windows; omit an incomplete final window."""
+    blind = blind_boundary(config, dataset_end)
+    validate_timeline(index, blind)
+    first = int(index.searchsorted(pd.Timestamp(config.validation_start)))
+    initial = 0 if config.training_bars is None else first - config.training_bars
+    if initial < 0 or first == 0:
+        raise ValueError("Insufficient history for the requested training window.")
+    plans: list[FoldPlan] = []
+    for start in range(first, len(index) - config.validation_bars + 1,
+                       config.step_bars or config.validation_bars):
+        train_start = initial
+        if config.mode == "rolling":
+            assert config.training_bars is not None
+            train_start = start - config.training_bars
+        plans.append(_plan(index, config, dataset_end, blind, train_start, start,
+                           start + config.validation_bars, len(plans)))
+    if not plans:
+        raise ValueError("No complete walk-forward validation window fits before blind.")
+    return tuple(plans)

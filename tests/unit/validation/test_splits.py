@@ -57,3 +57,28 @@ def test_random_options_invalid_boundaries_and_leap_year(timeline):
                                 validation_start="2020-01-15T00:00:00Z"),
                                dataset_end=pd.Timestamp("2021-02-28", tz="UTC"))
     assert leap.blind_start == pd.Timestamp("2020-02-28", tz="UTC")
+
+
+@pytest.mark.parametrize("mode", ["expanding", "rolling"])
+def test_walk_forward_complete_windows(timeline, mode):
+    from prooflab.validation.splits import WalkForwardConfig, walk_forward
+    cfg = WalkForwardConfig(**config().model_dump(), mode=mode, training_bars=20,
+                            validation_bars=10, step_bars=10)
+    plans = walk_forward(timeline, cfg, dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
+    assert len(plans) == 2
+    assert plans[0].train_indices == tuple(range(11, 31))
+    assert plans[1].train_indices == tuple(range(21 if mode == "rolling" else 11, 41))
+    assert plans[0].validation_indices == tuple(range(31, 41))
+    assert plans[1].validation_indices == tuple(range(41, 51))
+    assert plans[0].validation_end <= plans[1].validation_start
+
+
+def test_invalid_walk_forward_windows(timeline):
+    from prooflab.validation.splits import WalkForwardConfig, walk_forward
+    for kwargs in [{"mode": "rolling"}, {"step_bars": 1}]:
+        with pytest.raises(ValueError):
+            WalkForwardConfig(**config().model_dump(), validation_bars=10, **kwargs)
+    for kwargs in [{"training_bars": 40}, {"validation_bars": 50}]:
+        cfg = WalkForwardConfig(**{**config().model_dump(), "validation_bars": 10, **kwargs})
+        with pytest.raises(ValueError):
+            walk_forward(timeline, cfg, dataset_end=pd.Timestamp("2022-03-01", tz="UTC"))
