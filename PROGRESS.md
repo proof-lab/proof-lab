@@ -204,9 +204,7 @@ A minimal training pipeline skeleton should execute: Load Dataset → Validate �
 - [x] Implement artifact saving and loading that captures all required components
 - [x] Create the minimal training pipeline skeleton that respects chronological order and preprocessor rules
 
-### Agent validation — ready for human review
-
-All M04 implementation tasks are committed. Local verification on Windows with Python 3.14.6: **309 tests passed**, **95.61% coverage** (80% required), clean Ruff lint, and clean strict mypy checks across 49 source files. Integration tests exercise all seven classifiers for both setup directions, artifact reloads, full-horizon purging, SVM subpartition isolation, and rejection of blind-containing snapshots before data loading. Tests use synthetic data only; no real blind observations, labels, predictions, or metrics were accessed. The example configuration is `config/training.example.yaml`; usage and the SVM exception are documented in `src/prooflab/models/README.md`. The pipeline requires a separately versioned pre-blind research snapshot and bar-close entries. CI remains configured for Python 3.12; these commits have not been pushed or run remotely. M04 remains in progress until the human reviews and completes the milestone.
+All M04 tasks are committed and ready for human review.
 
 ### Human Review Checklist
 
