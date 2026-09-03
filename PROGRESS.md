@@ -365,4 +365,50 @@ The equity curve is generated from the actual simulated account balance and must
 
 ---
 
+## M08 – Proof Engine & Robustness 🔄 IN PROGRESS
+
+**Branch:** `feat/m08-proof-robustness`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+The Proof Engine is the central trust mechanism of Proof Lab. Its purpose is to answer: “Does this strategy work outside the data used to develop it?”
+
+It must produce a scorecard (Net Return, Profit Factor, Sharpe, Sortino, Max Drawdown, Expectancy, Win Rate, Trade Count, Total Costs), an equity curve with drawdown, global feature importance (gain, split importance, optional SHAP), and a clear separation between global importance and per-trade local explanation.
+
+Robustness testing is mandatory for any strategy that reaches this stage:
+
+- Parameter sensitivity (nearby target/stop values). A strategy that only works at exact parameters must receive a robustness warning.
+- Spread stress and slippage stress
+- Year-by-year performance
+- Regime performance (high/low volatility, trending/ranging, and optionally high/low spread, volume, session)
+- Trade-order Monte Carlo (minimum 1 000 simulations, preferred 10 000) reporting median return, 5th/95th percentile return, median/95th percentile drawdown, probability of loss and probability of ruin
+
+The engine assigns an explicit Proof Status — NOT PROVEN, WEAK, PROMISING or ROBUST — based on predefined rules, never on an arbitrary score. A strategy should only be considered validated when there is no known leakage, the blind test is completed, minimum trade count is satisfied, net performance is positive, risk limits are acceptable, robustness tests pass and execution stress tests pass. Thresholds are configurable.
+
+Every completed experiment should produce a research report containing configuration, dataset information, feature set, model architecture, validation methodology, performance, risk, costs, robustness, regime analysis, feature importance, warnings and an evidence-based conclusion. Explicit research warnings (LOW TRADE COUNT, HIGH PARAMETER SENSITIVITY, HIGH CLASS IMBALANCE, HIGH OUT-OF-SAMPLE DEGRADATION, PERFORMANCE DEPENDS ON LOW SPREAD, POSSIBLE OVERFITTING, INSUFFICIENT DATA, MODEL DRIFT DETECTED, etc.) must be raised when appropriate.
+
+### Tasks
+
+- [ ] Build the Proof Engine scorecard
+- [ ] Produce equity-curve and drawdown data
+- [ ] Calculate global feature importance
+- [ ] Implement parameter sensitivity tests
+- [ ] Implement spread and slippage stress tests
+- [ ] Implement Monte Carlo trade-order reshuffling (≥ 1 000 runs)
+- [ ] Implement regime performance analysis
+- [ ] Define and apply the explicit Proof Status rules
+- [ ] Generate the full research report with warnings
+
+### Human Review Checklist
+
+- [ ] Proof Status is determined by explicit rules
+- [ ] Monte Carlo produces the required percentile statistics
+- [ ] Sensitivity analysis flags fragile parameter choices
+- [ ] Regime analysis covers the required cases
+- [ ] Report is complete and evidence-based
+- [ ] Appropriate warnings are generated
+
+---
+
 _End of current work._
