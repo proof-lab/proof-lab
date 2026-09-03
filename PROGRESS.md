@@ -251,6 +251,10 @@ Every prediction must conform to this schema:
 }
 ```
 
+### Approved M05 implementation decision
+
+M05 keeps separate long and short ensembles, continuing the M04 one-model-per-configured-direction choice. Long ensembles emit BUY or IGNORE with SELL probability zero; short ensembles emit SELL or IGNORE with BUY probability zero in the required three-class output schema. M05 does not train a joint long/short three-class model. Formal Platt/isotonic calibration uses chronologically valid pre-blind data only; the blind period remains untouched. This formal M05 calibration is distinct from the narrow M04 native-style SVM probability-estimation exception.
+
 ### Tasks
 
 - [ ] Implement hard voting
