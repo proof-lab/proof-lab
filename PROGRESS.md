@@ -163,4 +163,46 @@ The same feature implementations will later be reused for live inference; there 
 
 ---
 
+## M04 – Model Engine
+
+**Branch:** `feat/m04-model-engine`
+
+### Context for the Agent
+
+Proof Lab trains multiple models so their combination can later be evaluated. Before the main ensemble is judged, simple baselines are required so we can measure whether complexity actually adds value.
+
+Required baselines: Random Classifier, Majority Classifier, Logistic Regression, Simple Rule Strategy, XGBoost-only.
+
+Core models:
+
+- **XGBoost** (“Rule-Maker”): configurable tree depth, learning rate, number of estimators, subsampling, column sampling, regularization, class weights. Hyperparameter tuning may use only training/validation data.
+- **PyTorch Neural Network**: configurable architecture (hidden layers, units, dropout, learning rate, batch size, epochs, weight decay). Early stopping must use validation data only. Initial shape is Input → Dense → ReLU → Dropout → Dense → ReLU → Dropout → Output.
+- **SVM** (“Statistician”): configurable kernel, C, gamma, class weights, probability estimation. Feature scaling must be performed through a pipeline fitted only on training data.
+
+All models share a common interface. Every trained model is stored as an artifact that must contain at least: model weights, preprocessor, feature schema, feature order, training metadata. The blind test set must never be used for tuning or early stopping.
+
+A minimal training pipeline skeleton should execute: Load Dataset → Validate → Generate Labels → Generate Features → Remove warm-up rows → Chronological Split → Fit Preprocessors on Training Only → Train models → Persist Artifact.
+
+### Tasks
+
+- [ ] Define a common model interface
+- [ ] Implement Random and Majority baselines
+- [ ] Implement Logistic Regression baseline
+- [ ] Implement the XGBoost model with the required configurability
+- [ ] Implement the configurable PyTorch neural network with validation-only early stopping
+- [ ] Implement the SVM with probability estimates and training-fitted scaling
+- [ ] Implement artifact saving and loading that captures all required components
+- [ ] Create the minimal training pipeline skeleton that respects chronological order and preprocessor rules
+
+### Human Review Checklist
+
+- [ ] All models implement the same interface
+- [ ] Tuning and early stopping cannot see the blind test set
+- [ ] Artifacts contain everything needed for later inference
+- [ ] Baselines are present and functional
+- [ ] No ensemble or calibration logic has been added yet
+- [ ] Training remains free of future information
+
+---
+
 _End of current work._
