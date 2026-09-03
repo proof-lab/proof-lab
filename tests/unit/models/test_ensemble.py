@@ -105,3 +105,24 @@ def test_member_validation_horizons_count_and_blind_boundary(member_factory):
                              artifact.manifest.model_copy(update={"training": training}))
     with pytest.raises(ValueError, match="blind"):
         DirectionalEnsemble({"a": artifact}, config())
+
+
+@pytest.mark.parametrize("action,direction", [(1, "LONG"), (-1, "SHORT")])
+def test_probability_average_uses_class_mapping_not_votes(member_factory, action, direction):
+    members = {"a": member_factory(action, 0.2), "b": member_factory(action, 0.4)}
+    ensemble = DirectionalEnsemble(members, config(direction, method="probability_average"))
+    batch = ensemble.evaluate(pd.DataFrame({"signal": [1.]}))
+    assert batch.predictions[0] == 0
+    assert all(vote[0] == action for vote in batch.model_votes.values())
+    assert batch.probabilities[0, ensemble.classes_.index(action)] == pytest.approx(0.3)
+    assert ensemble.fit_details_["probability_semantics"] == "uncalibrated_probability"
+
+
+def test_missing_action_class_is_zero_padded(member_factory):
+    member = member_factory()
+    member.model.classes_ = [0]
+    member.model.probability = 0
+    member.model.vote = 0
+    member = ModelArtifact(member.model, member.manifest.model_copy(update={"classes": [0]}))
+    ensemble = DirectionalEnsemble({"a": member}, config(method="probability_average"))
+    np.testing.assert_array_equal(ensemble.predict_proba(pd.DataFrame({"signal": [1.]})), [[1, 0]])

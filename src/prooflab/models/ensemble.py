@@ -25,7 +25,7 @@ class EnsembleConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
     version: Literal[1] = 1
     direction: Direction
-    method: Literal["hard_vote"] = "hard_vote"
+    method: Literal["hard_vote", "probability_average"] = "hard_vote"
     blind_start: AwareDatetime
 
 
@@ -80,7 +80,8 @@ class DirectionalEnsemble(BaseModelWrapper):
             "blind_start": config.blind_start.isoformat(),
             "members": {name: a.manifest.model_dump(mode="json")
                         for name, a in self._members.items()},
-            "probability_semantics": "raw_vote_fraction",
+            "probability_semantics": ("raw_vote_fraction" if config.method == "hard_vote"
+                                      else "uncalibrated_probability"),
         }
         self.is_fitted = True
 
@@ -126,6 +127,14 @@ class DirectionalEnsemble(BaseModelWrapper):
         votes = {name: artifact.model.predict(aligned)
                  for name, artifact in self._members.items()}
         action_score = np.mean([vote == self.action for vote in votes.values()], axis=0)
+        if self.config.method == "probability_average":
+            member_scores = []
+            for artifact in self._members.values():
+                model = artifact.model
+                proba = model.predict_proba(aligned)
+                member_scores.append(proba[:, model.classes_.index(self.action)]
+                                     if self.action in model.classes_ else np.zeros(len(aligned)))
+            action_score = np.mean(member_scores, axis=0)
         probabilities = np.column_stack([
             action_score if cls == self.action else 1 - action_score for cls in self.classes_
         ])
