@@ -103,13 +103,13 @@ Required test cases include target-first, stop-first, timeout, same-bar ambiguit
 
 ### Human Review Checklist
 
-- [ ] Labels are fully deterministic
-- [ ] Conservative policy is the default
-- [ ] Ambiguous bars are handled exactly as configured
-- [ ] Rich metadata is preserved alongside the canonical classes
-- [ ] Quality report matches the required content
-- [ ] All critical test cases pass
-- [ ] No feature or model code has been added
+- [x] Labels are fully deterministic
+- [x] Conservative policy is the default
+- [x] Ambiguous bars are handled exactly as configured
+- [x] Rich metadata is preserved alongside the canonical classes
+- [x] Quality report matches the required content
+- [x] All critical test cases pass
+- [x] No feature or model code has been added
 
 ---
 
