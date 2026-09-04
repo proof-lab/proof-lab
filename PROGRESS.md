@@ -483,4 +483,52 @@ A strategy moves through explicit approval states: RESEARCH → VALIDATED → PA
 
 ---
 
+## M11 – Strategy Packaging ✅ COMPLETE
+
+**Branch:** `feat/m11-strategy-packaging`  
+**Status:** Completed and reviewed
+
+### Context for the Agent
+
+A finished strategy is packaged as a portable `.plb` file so it can be moved between environments without carrying proprietary historical datasets (unless explicitly configured).
+
+A model artifact must contain: model weights, preprocessor, calibration model, feature schema, feature version, label configuration, strategy configuration, training metadata, validation metrics, dataset checksum and software version.
+
+The `.plb` format is a ZIP container with:
+
+```
+manifest.json
+models/          (xgboost, neural_network, svm, \ldots)
+calibration/
+features/schema.json
+strategy/strategy.yaml
+validation/metrics.json
+checksums/sha256.json
+```
+
+The manifest records format_version, strategy_id, symbol, timeframe, feature_version, model_version and created_at.
+
+Imported packages are treated as untrusted input. The system must validate file structure, verify checksums, validate model metadata, reject unsupported versions, reject path traversal, reject arbitrary executable content, reject unexpected files and limit extraction size. Importing a `.plb` must never execute arbitrary code.
+
+A package must declare required symbol, timeframe, features, feature parameters, model version and minimum application version. The application must display incompatibilities before loading the strategy.
+
+### Tasks
+
+- [x] Ensure model artifacts contain every required component
+- [x] Define the `.plb` ZIP layout and manifest format
+- [x] Implement the export pipeline
+- [x] Implement the import pipeline with full security validation
+- [x] Implement compatibility declaration and checking
+- [x] Write tests for both valid packages and malicious/unsafe packages
+
+### Human Review Checklist
+
+- [x] Import never executes arbitrary code
+- [x] Checksums are verified
+- [x] Unsupported or incompatible packages are rejected clearly
+- [x] Manifest contains all required fields
+- [x] Historical datasets are not embedded by default
+
+---
+
 _End of current work._
