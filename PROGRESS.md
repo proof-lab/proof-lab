@@ -548,13 +548,13 @@ Long-running operations (training, backtesting, robustness testing) must not blo
 
 ### Tasks
 
-- [ ] Create the FastAPI application skeleton with dependency injection
+- [x] Create the FastAPI application skeleton with dependency injection
 - [ ] Implement the data-related endpoints
 - [ ] Implement experiment and training endpoints
 - [ ] Implement backtest endpoints
 - [ ] Implement strategy export/import endpoints
 - [ ] Implement live and risk control endpoints (including kill switch)
-- [ ] Add background job support for long-running tasks
+- [x] Add background job support for long-running tasks
 - [ ] Provide OpenAPI documentation and basic protection for dangerous endpoints
 
 ### Human Review Checklist
