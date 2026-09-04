@@ -594,7 +594,7 @@ After an application restart the live engine must: reconnect to the broker, quer
 
 ### Tasks
 
-- [ ] Define the BrokerAdapter interface
+- [x] Define the BrokerAdapter interface
 - [ ] Implement the MT5 adapter (or a high-fidelity mock)
 - [ ] Implement the live order state machine
 - [ ] Prevent duplicate orders for the same signal
