@@ -12,6 +12,10 @@ from prooflab.live.deduplication import (
     ProcessedSignalRecord,
     SignalDeduplicator,
 )
+from prooflab.live.engine import (
+    LiveExecutionEngine,
+    LiveTradingDisabledError,
+)
 from prooflab.live.mt5_adapter import (
     MockMT5Adapter,
     MT5Adapter,
@@ -42,9 +46,11 @@ __all__ = [
     "DiscrepancyType",
     "DuplicateSignalError",
     "InvalidOrderStateTransitionError",
+    "LiveExecutionEngine",
     "LiveOrder",
     "LiveOrderEvent",
     "LiveOrderState",
+    "LiveTradingDisabledError",
     "MT5Adapter",
     "MT5ConnectionError",
     "MockMT5Adapter",
