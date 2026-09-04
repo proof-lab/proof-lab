@@ -1,0 +1,10 @@
+﻿# Production environment overrides
+env: production
+
+log:
+  level: INFO
+  format: json
+
+# live_trading_enabled is intentionally absent here.
+# It remains false (from default.yaml) unless the explicit live trading gate
+# is activated through the proper authorisation flow.

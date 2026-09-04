@@ -1,0 +1,80 @@
+name: Staging Pre-Release
+
+on:
+  push:
+    branches:
+      - staging
+
+permissions:
+  contents: write
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Quality Gates: Lint, Type-Check, and Test
+  # -------------------------------------------------------------------------
+  validate:
+    name: Validate Staging Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CPU PyTorch
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install dependencies
+        run: pip install -e ".[dev,ml]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Type check (mypy)
+        run: mypy src/
+
+      - name: Run test suite with coverage
+        run: pytest tests/unit/ -v --cov=prooflab --cov-report=term-missing
+
+  # -------------------------------------------------------------------------
+  # Build Distribution Packages & Publish GitHub Pre-Release
+  # -------------------------------------------------------------------------
+  prerelease:
+    name: Build & Publish Pre-Release
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install packaging tools
+        run: pip install build
+
+      - name: Build distribution artifacts (wheel and sdist)
+        run: python -m build
+
+      - name: Determine Pre-Release Tag
+        id: vars
+        run: |
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          TAG="v${VERSION}-rc.${{ github.run_number }}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Pre-Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.vars.outputs.tag }}" dist/* \
+            --title "Proof Lab v${{ steps.vars.outputs.version }} (RC ${{ github.run_number }})" \
+            --notes "### Automated Staging Pre-Release Candidate
+          > [!IMPORTANT]
+          > Generated automatically from commit \`${{ github.sha }}\` on \`staging\`.
+          > Intended for paper trading verification, sandbox testing, and tester evaluation." \
+            --prerelease
