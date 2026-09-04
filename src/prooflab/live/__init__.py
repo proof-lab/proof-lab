@@ -7,6 +7,11 @@ from prooflab.live.base import (
     BrokerCredentials,
     BrokerPosition,
 )
+from prooflab.live.deduplication import (
+    DuplicateSignalError,
+    ProcessedSignalRecord,
+    SignalDeduplicator,
+)
 from prooflab.live.mt5_adapter import (
     MockMT5Adapter,
     MT5Adapter,
@@ -28,6 +33,7 @@ __all__ = [
     "BrokerContextInfo",
     "BrokerCredentials",
     "BrokerPosition",
+    "DuplicateSignalError",
     "InvalidOrderStateTransitionError",
     "LiveOrder",
     "LiveOrderEvent",
@@ -36,4 +42,6 @@ __all__ = [
     "MT5ConnectionError",
     "MockMT5Adapter",
     "OrderStateMachine",
+    "ProcessedSignalRecord",
+    "SignalDeduplicator",
 ]
