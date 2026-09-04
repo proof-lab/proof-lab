@@ -6,6 +6,17 @@ from prooflab.monitoring.audit import (
     AuditRecord,
     AuditSeverity,
 )
+from prooflab.monitoring.drift import (
+    DriftCoordinator,
+    DriftReport,
+    DriftStatus,
+    FeatureDriftDetector,
+    FeatureDriftResult,
+    PerformanceDriftDetector,
+    PerformanceDriftResult,
+    PredictionDriftDetector,
+    PredictionDriftResult,
+)
 from prooflab.monitoring.health import (
     ComponentHealth,
     ComponentStatus,
@@ -20,6 +31,15 @@ __all__ = [
     "AuditSeverity",
     "ComponentHealth",
     "ComponentStatus",
+    "DriftCoordinator",
+    "DriftReport",
+    "DriftStatus",
+    "FeatureDriftDetector",
+    "FeatureDriftResult",
     "HealthMonitor",
+    "PerformanceDriftDetector",
+    "PerformanceDriftResult",
+    "PredictionDriftDetector",
+    "PredictionDriftResult",
     "SystemHealthReport",
 ]
