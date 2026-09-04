@@ -483,10 +483,10 @@ A strategy moves through explicit approval states: RESEARCH → VALIDATED → PA
 
 ---
 
-## M11 – Strategy Packaging 🔄 IN PROGRESS
+## M11 – Strategy Packaging ✅ COMPLETE
 
 **Branch:** `feat/m11-strategy-packaging`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -523,11 +523,11 @@ A package must declare required symbol, timeframe, features, feature parameters,
 
 ### Human Review Checklist
 
-- [ ] Import never executes arbitrary code
-- [ ] Checksums are verified
-- [ ] Unsupported or incompatible packages are rejected clearly
-- [ ] Manifest contains all required fields
-- [ ] Historical datasets are not embedded by default
+- [x] Import never executes arbitrary code
+- [x] Checksums are verified
+- [x] Unsupported or incompatible packages are rejected clearly
+- [x] Manifest contains all required fields
+- [x] Historical datasets are not embedded by default
 
 ---
 
