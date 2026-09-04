@@ -531,4 +531,40 @@ A package must declare required symbol, timeframe, features, feature parameters,
 
 ---
 
+## M12 – API Layer 🔄 IN PROGRESS
+
+**Branch:** `feat/m12-api-layer`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+The quantitative engine is now capable of research, validation, backtesting and paper trading. These capabilities must be exposed through a clean FastAPI surface so that a UI or other clients can drive the system without talking directly to Python internals.
+
+Recommended API domains: /api/data, /api/experiments, /api/features, /api/models, /api/validation, /api/backtests, /api/risk, /api/live, /api/strategies, /api/system.
+
+Example endpoints include dataset listing and extraction, experiment creation and retrieval, training start/status, backtest creation/retrieval, strategy export/import, live status, paper start, live enable, and kill-switch activation.
+
+Long-running operations (training, backtesting, robustness testing) must not block the API process; a job queue / worker architecture is required (a local process-based worker is acceptable for the MVP). The API must not contain business logic that contradicts the quantitative engine. Dangerous endpoints must be protected. Request and response schemas must be explicit. Authentication is required for production endpoints.
+
+### Tasks
+
+- [ ] Create the FastAPI application skeleton with dependency injection
+- [ ] Implement the data-related endpoints
+- [ ] Implement experiment and training endpoints
+- [ ] Implement backtest endpoints
+- [ ] Implement strategy export/import endpoints
+- [ ] Implement live and risk control endpoints (including kill switch)
+- [ ] Add background job support for long-running tasks
+- [ ] Provide OpenAPI documentation and basic protection for dangerous endpoints
+
+### Human Review Checklist
+
+- [ ] Long-running work is asynchronous
+- [ ] API contains no contradictory business logic
+- [ ] Dangerous endpoints are protected
+- [ ] Schemas are explicit
+- [ ] No UI code has been introduced
+
+---
+
 _End of current work._
