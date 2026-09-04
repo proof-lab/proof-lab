@@ -714,13 +714,13 @@ All workflow definitions must follow least-privilege token permissions (`content
 
 ### Tasks
 
-- [ ] Create the Staging Pre-release workflow (`.github/workflows/prerelease.yml`) triggered on push to `staging`
-- [ ] Implement automated release candidate versioning (e.g. `vX.Y.Z-rc.<run_number>`) and changelog generation for staging
-- [ ] Add Python package building (`python -m build`) for distribution wheels and source archives in both workflows
-- [ ] Create the Production Main Release workflow (`.github/workflows/release.yml`) triggered on push to `production`
-- [ ] Implement official semantic version tagging and publication of General Availability releases marked as `latest`
-- [ ] Configure least-privilege GitHub Actions permissions (`contents: write`) and error fail-safes
-- [ ] Write validation tests and local dry-run scripts to verify workflow syntax and release logic
+- [x] Create the Staging Pre-release workflow (`.github/workflows/prerelease.yml`) triggered on push to `staging`
+- [x] Implement automated release candidate versioning (e.g. `vX.Y.Z-rc.<run_number>`) and changelog generation for staging
+- [x] Add Python package building (`python -m build`) for distribution wheels and source archives in both workflows
+- [x] Create the Production Main Release workflow (`.github/workflows/release.yml`) triggered on push to `production`
+- [x] Implement official semantic version tagging and publication of General Availability releases marked as `latest`
+- [x] Configure least-privilege GitHub Actions permissions (`contents: write`) and error fail-safes
+- [x] Write validation tests and local dry-run scripts to verify workflow syntax and release logic
 
 ### Human Review Checklist
 
