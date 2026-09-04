@@ -23,12 +23,25 @@ from prooflab.monitoring.health import (
     HealthMonitor,
     SystemHealthReport,
 )
+from prooflab.monitoring.suspension import (
+    AutomaticSuspensionEngine,
+    CandidateStatus,
+    ChampionChallengerModel,
+    ChampionChallengerRegistry,
+    SuspensionDecision,
+    SuspensionRuleConfig,
+    SuspensionTrigger,
+)
 
 __all__ = [
     "AuditEventType",
     "AuditLogger",
     "AuditRecord",
     "AuditSeverity",
+    "AutomaticSuspensionEngine",
+    "CandidateStatus",
+    "ChampionChallengerModel",
+    "ChampionChallengerRegistry",
     "ComponentHealth",
     "ComponentStatus",
     "DriftCoordinator",
@@ -41,5 +54,9 @@ __all__ = [
     "PerformanceDriftResult",
     "PredictionDriftDetector",
     "PredictionDriftResult",
+    "SuspensionDecision",
+    "SuspensionRuleConfig",
+    "SuspensionTrigger",
     "SystemHealthReport",
 ]
+
