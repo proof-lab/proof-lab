@@ -669,14 +669,14 @@ Auto-Pilot modes are OFF / PAPER / LIVE (never a simple ON/OFF that can accident
 
 ### Tasks
 
-- [ ] Build Data Studio
-- [ ] Build Quant Laboratory (setup, features, models, training progress)
-- [ ] Build the Proof Engine views (scorecard, equity curve, robustness, status, warnings)
-- [ ] Build the Live Dashboard with model votes and risk status
-- [ ] Build the Safeguards / risk-controls UI
-- [ ] Implement the Auto-Pilot selector (OFF / PAPER / LIVE)
-- [ ] Add the manual / Co-Pilot trading pad
-- [ ] Verify that the complete end-to-end workflow is possible through the UI alone
+- [x] Build Data Studio
+- [x] Build Quant Laboratory (setup, features, models, training progress)
+- [x] Build the Proof Engine views (scorecard, equity curve, robustness, status, warnings)
+- [x] Build the Live Dashboard with model votes and risk status
+- [x] Build the Safeguards / risk-controls UI
+- [x] Implement the Auto-Pilot selector (OFF / PAPER / LIVE)
+- [x] Add the manual / Co-Pilot trading pad
+- [x] Verify that the complete end-to-end workflow is possible through the UI alone
 
 ### Human Review Checklist
 
