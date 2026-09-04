@@ -531,10 +531,10 @@ A package must declare required symbol, timeframe, features, feature parameters,
 
 ---
 
-## M12 – API Layer 🔄 IN PROGRESS
+## M12 – API Layer ✅ COMPLETE
 
 **Branch:** `feat/m12-api-layer`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -559,11 +559,11 @@ Long-running operations (training, backtesting, robustness testing) must not blo
 
 ### Human Review Checklist
 
-- [ ] Long-running work is asynchronous
-- [ ] API contains no contradictory business logic
-- [ ] Dangerous endpoints are protected
-- [ ] Schemas are explicit
-- [ ] No UI code has been introduced
+- [x] Long-running work is asynchronous
+- [x] API contains no contradictory business logic
+- [x] Dangerous endpoints are protected
+- [x] Schemas are explicit
+- [x] No UI code has been introduced
 
 ---
 
