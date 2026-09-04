@@ -634,8 +634,8 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 - [x] Implement the system health monitor
 - [x] Implement feature, prediction and performance drift detection
 - [x] Implement automatic suspension rules and states
-- [ ] Harden secrets handling
-- [ ] Perform a final security review of package import and API endpoints
+- [x] Harden secrets handling
+- [x] Perform a final security review of package import and API endpoints
 
 ### Human Review Checklist
 
