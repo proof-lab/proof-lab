@@ -553,9 +553,9 @@ Long-running operations (training, backtesting, robustness testing) must not blo
 - [x] Implement experiment and training endpoints
 - [x] Implement backtest endpoints
 - [x] Implement strategy export/import endpoints
-- [ ] Implement live and risk control endpoints (including kill switch)
+- [x] Implement live and risk control endpoints (including kill switch)
 - [x] Add background job support for long-running tasks
-- [ ] Provide OpenAPI documentation and basic protection for dangerous endpoints
+- [x] Provide OpenAPI documentation and basic protection for dangerous endpoints
 
 ### Human Review Checklist
 
