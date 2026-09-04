@@ -55,9 +55,10 @@ class SuspensionDecision(BaseModel):
 
 
 class AutomaticSuspensionEngine:
-    """Evaluates live market, risk, drift, and telemetry conditions to enforce strategy suspension."""
+    """Evaluates live market, risk, drift, and health telemetry to enforce strategy suspension."""
 
     def __init__(self, config: SuspensionRuleConfig | None = None) -> None:
+
         self.config = config or SuspensionRuleConfig()
 
     def evaluate(
@@ -234,9 +235,12 @@ class ChampionChallengerRegistry:
         """Promote challenger to champion; strictly requires explicit human approval."""
         if not explicit_human_approval:
             raise PermissionError(
-                "Automatic promotion of retrained candidate models to live execution is prohibited. "
-                "Explicit human approval is required to promote a Challenger to Champion."
+                "Automatic promotion of retrained candidate models to live execution is "
+                "prohibited. Explicit human approval is required to promote a "
+                "Challenger to Champion."
             )
+
+
 
         record = self._registry.get(strategy_id)
         if not record or not record.challenger_model_id:

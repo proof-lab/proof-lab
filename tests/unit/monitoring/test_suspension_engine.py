@@ -1,4 +1,4 @@
-"""Unit tests for automatic strategy suspension engine and champion/challenger retraining governance."""
+"""Unit tests for automatic strategy suspension engine and retraining governance."""
 
 from __future__ import annotations
 

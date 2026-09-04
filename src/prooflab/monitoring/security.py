@@ -213,13 +213,12 @@ class SecurityReviewer:
 
         validator = PackageSecurityValidator()
         disallowed = validator.DISALLOWED_EXTENSIONS
-        allowed = validator.ALLOWED_EXTENSIONS
 
         if ".py" not in disallowed or ".sh" not in disallowed or ".exe" not in disallowed:
             return SecurityCheckResult(
                 check_name="package_import_security",
                 status=SecurityCheckStatus.FAILED,
-                details="PackageSecurityValidator missing critical disallowed executable extensions",
+                details="PackageSecurityValidator missing disallowed executable extensions",
             )
 
         if validator.max_file_size <= 0 or validator.max_total_size <= 0:
@@ -250,12 +249,17 @@ class SecurityReviewer:
 
         # Inspect all routes and their dependencies
         for route in target_app.routes:
-            path = getattr(route, "path", "")
-            methods = getattr(route, "methods", set())
-            dependencies = getattr(route, "dependencies", [])
+            path: str = str(getattr(route, "path", ""))
+            raw_methods: Any = getattr(route, "methods", set())
+            is_seq = isinstance(raw_methods, (set, list, tuple))
+            methods: set[str] = set(raw_methods) if is_seq else set()
+
+            dependencies: list[Any] = list(getattr(route, "dependencies", []))
+
 
             is_hazardous = any(keyword in path for keyword in hazardous_keywords)
             is_modifying = any(m in methods for m in {"POST", "PUT", "DELETE", "PATCH"})
+
 
             if is_hazardous and is_modifying:
                 # Check for security dependencies
@@ -267,14 +271,20 @@ class SecurityReviewer:
             return SecurityCheckResult(
                 check_name="api_endpoints_security",
                 status=SecurityCheckStatus.FAILED,
-                details=f"Hazardous routes missing security dependencies: {unsecured_hazardous_routes}",
+                details=(
+                    f"Hazardous routes missing security dependencies: "
+                    f"{unsecured_hazardous_routes}"
+                ),
             )
 
         return SecurityCheckResult(
             check_name="api_endpoints_security",
             status=SecurityCheckStatus.PASSED,
-            details="All API routes protected with required auth headers and admin authorization gates",
+            details=(
+                "All API routes protected with required auth headers and admin authorization gates"
+            ),
         )
+
 
     @classmethod
     def run_comprehensive_security_audit(cls, app: Any = None) -> SecurityAuditReport:

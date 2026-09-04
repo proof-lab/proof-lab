@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from pathlib import Path
 
 from prooflab.monitoring.audit import (
@@ -24,6 +23,7 @@ def test_audit_logger_in_memory() -> None:
         strategy_id="STRAT_001",
         metadata={"trees": 100, "val_loss": 0.32},
     )
+    assert rec1.event_type == AuditEventType.MODEL_TRAINED
 
     rec2 = audit.log(
         event_type=AuditEventType.KILL_SWITCH_ACTIVATED,
@@ -41,6 +41,7 @@ def test_audit_logger_in_memory() -> None:
         symbol="EURUSD",
         metadata={"ticket": 123456, "fill_price": 1.0850},
     )
+
 
     assert len(audit.records) == 3
 

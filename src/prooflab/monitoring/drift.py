@@ -5,11 +5,10 @@ from __future__ import annotations
 import logging
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
-from scipy import stats  # type: ignore[import-untyped]
+from scipy import stats
 
 logger = logging.getLogger(__name__)
 
@@ -206,15 +205,20 @@ class PredictionDriftDetector:
             4,
         )
 
-        if divergence >= divergence_critical or (mean_conf < min_confidence_warning and len(confidences) >= 10):
+        is_low_conf = mean_conf < min_confidence_warning and len(confidences) >= 10
+        if divergence >= divergence_critical or is_low_conf:
             status = DriftStatus.SUSPENDED
-            msg = f"Critical prediction drift: divergence={divergence:.4f}, mean_conf={mean_conf:.4f}"
+            msg = (
+                f"Critical prediction drift: divergence={divergence:.4f}, "
+                f"mean_conf={mean_conf:.4f}"
+            )
         elif divergence >= divergence_warning:
             status = DriftStatus.WARNING
             msg = f"Moderate prediction shift: divergence={divergence:.4f}"
         else:
             status = DriftStatus.NORMAL
             msg = f"Prediction distribution nominal (divergence={divergence:.4f})"
+
 
         return PredictionDriftResult(
             buy_ratio=buy_r,
@@ -265,16 +269,25 @@ class PerformanceDriftDetector:
 
         gross_profit = sum(wins)
         gross_loss = abs(sum(losses))
-        profit_factor = round(gross_profit / gross_loss, 4) if gross_loss > 0 else (99.0 if gross_profit > 0 else 0.0)
+        if gross_loss > 0:
+            profit_factor = round(gross_profit / gross_loss, 4)
+        else:
+            profit_factor = 99.0 if gross_profit > 0 else 0.0
 
-        drop_pct = round(max(0.0, (benchmark_win_rate - win_rate) / benchmark_win_rate), 4) if benchmark_win_rate > 0 else 0.0
+        if benchmark_win_rate > 0:
+            drop_pct = round(max(0.0, (benchmark_win_rate - win_rate) / benchmark_win_rate), 4)
+        else:
+            drop_pct = 0.0
 
         if dd >= max_drawdown_limit:
             status = DriftStatus.SUSPENDED
             msg = f"Drawdown limit exceeded: {dd * 100:.1f}% >= {max_drawdown_limit * 100:.1f}%"
         elif drop_pct >= win_rate_drop_warning and len(live_trade_pnls) >= 10:
             status = DriftStatus.WARNING
-            msg = f"Performance degradation: win rate dropped {drop_pct * 100:.1f}% (PF={profit_factor:.2f})"
+            msg = (
+                f"Performance degradation: win rate dropped {drop_pct * 100:.1f}% "
+                f"(PF={profit_factor:.2f})"
+            )
         else:
             status = DriftStatus.NORMAL
             msg = f"Performance nominal (WR={win_rate * 100:.1f}%, DD={dd * 100:.1f}%)"
@@ -318,11 +331,13 @@ class DriftCoordinator:
         else:
             overall = DriftStatus.NORMAL
 
+        pred_stat = prediction_result.status.value if prediction_result else "N/A"
+        perf_stat = performance_result.status.value if performance_result else "N/A"
         summary = (
             f"Drift assessment {overall.value}: {len(feat_map)} features evaluated, "
-            f"prediction_status={prediction_result.status.value if prediction_result else 'N/A'}, "
-            f"performance_status={performance_result.status.value if performance_result else 'N/A'}."
+            f"prediction_status={pred_stat}, performance_status={perf_stat}."
         )
+
 
         return DriftReport(
             overall_status=overall,

@@ -80,7 +80,10 @@ def test_drift_coordinator_rollup() -> None:
         )
     }
     pred_res = PredictionDriftDetector.evaluate_predictions(["BUY"] * 10, [0.45] * 10)
-    perf_res = PerformanceDriftDetector.evaluate_performance([], current_equity=10000.0, peak_equity=10000.0)
+    perf_res = PerformanceDriftDetector.evaluate_performance(
+        [], current_equity=10000.0, peak_equity=10000.0
+    )
+
 
     report = DriftCoordinator.evaluate(
         feature_results=feat_res,

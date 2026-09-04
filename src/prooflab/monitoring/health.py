@@ -74,7 +74,9 @@ class HealthMonitor:
                 health = checker()
                 latency = round((time.perf_counter() - start) * 1000.0, 2)
                 # Ensure latency and name are attached
-                health = health.model_copy(update={"latency_ms": latency, "is_critical": is_critical})
+                health = health.model_copy(
+                    update={"latency_ms": latency, "is_critical": is_critical}
+                )
             except Exception as exc:
                 latency = round((time.perf_counter() - start) * 1000.0, 2)
                 logger.exception("Health check failed for component %s", name)
@@ -103,8 +105,13 @@ class HealthMonitor:
         else:
             overall_status = ComponentStatus.HEALTHY
 
-        failed_names = [k for k, v in components_health.items() if v.status == ComponentStatus.FAILED]
-        degraded_names = [k for k, v in components_health.items() if v.status == ComponentStatus.DEGRADED]
+        failed_names = [
+            k for k, v in components_health.items() if v.status == ComponentStatus.FAILED
+        ]
+        degraded_names = [
+            k for k, v in components_health.items() if v.status == ComponentStatus.DEGRADED
+        ]
+
 
         if overall_status == ComponentStatus.HEALTHY:
             summary = f"All {len(components_health)} monitored components are HEALTHY."
