@@ -551,7 +551,7 @@ Long-running operations (training, backtesting, robustness testing) must not blo
 - [x] Create the FastAPI application skeleton with dependency injection
 - [x] Implement the data-related endpoints
 - [x] Implement experiment and training endpoints
-- [ ] Implement backtest endpoints
+- [x] Implement backtest endpoints
 - [ ] Implement strategy export/import endpoints
 - [ ] Implement live and risk control endpoints (including kill switch)
 - [x] Add background job support for long-running tasks
