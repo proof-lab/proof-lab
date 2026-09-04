@@ -23,6 +23,14 @@ from prooflab.monitoring.health import (
     HealthMonitor,
     SystemHealthReport,
 )
+from prooflab.monitoring.security import (
+    SecretSanitizer,
+    SecretSanitizingFilter,
+    SecurityAuditReport,
+    SecurityCheckResult,
+    SecurityCheckStatus,
+    SecurityReviewer,
+)
 from prooflab.monitoring.suspension import (
     AutomaticSuspensionEngine,
     CandidateStatus,
@@ -54,9 +62,16 @@ __all__ = [
     "PerformanceDriftResult",
     "PredictionDriftDetector",
     "PredictionDriftResult",
+    "SecretSanitizer",
+    "SecretSanitizingFilter",
+    "SecurityAuditReport",
+    "SecurityCheckResult",
+    "SecurityCheckStatus",
+    "SecurityReviewer",
     "SuspensionDecision",
     "SuspensionRuleConfig",
     "SuspensionTrigger",
     "SystemHealthReport",
 ]
+
 
