@@ -567,10 +567,10 @@ Long-running operations (training, backtesting, robustness testing) must not blo
 
 ---
 
-### M13 – Live Execution + MT5 🔄 IN PROGRESS
+## M13 – Live Execution + MT5 ✅ COMPLETE
 
 **Branch:** `feat/m13-live-mt5`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -603,11 +603,11 @@ After an application restart the live engine must: reconnect to the broker, quer
 
 ### Human Review Checklist
 
-- [ ] All broker-specific code is behind the adapter interface
-- [ ] Recovery correctly reconciles local and broker state
-- [ ] Duplicate orders are impossible
-- [ ] Live trading remains disabled by default
-- [ ] Credentials never appear in logs
+- [x] All broker-specific code is behind the adapter interface
+- [x] Recovery correctly reconciles local and broker state
+- [x] Duplicate orders are impossible
+- [x] Live trading remains disabled by default
+- [x] Credentials never appear in logs
 
 ---
 
