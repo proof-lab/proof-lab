@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from prooflab.live.base import BrokerAdapter, BrokerPosition
 from prooflab.live.orders import LiveOrder, LiveOrderState
 from prooflab.risk.engine import RiskEngine
+from prooflab.risk.limits import OpenPositionRecord
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +161,19 @@ class ReconciliationEngine:
             # Sync start of day baseline and current exposure
             risk_engine.limits_evaluator.start_of_day_equity = account_info.equity
             risk_engine.limits_evaluator.start_of_week_equity = account_info.equity
+            risk_engine.state_tracker.current_equity = account_info.equity
+            # Sync open position records to risk state tracker
+            open_records = [
+                OpenPositionRecord(
+                    symbol=p.symbol,
+                    side=p.side,
+                    quantity=p.volume,
+                    nominal_exposure=p.volume * p.open_price * 100000.0,
+                    unrealized_pnl=p.unrealized_pnl,
+                )
+                for p in broker_positions
+            ]
+            risk_engine.sync_open_positions(open_records)
             logger.info(
                 "Restored risk engine state: equity=%.2f, balance=%.2f, open_positions=%d, exposure=%.2f",
                 account_info.equity,
