@@ -647,10 +647,10 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 
 ---
 
-### M15 – Application UI 🔄 IN PROGRESS
+### M15 – Application UI ✅ COMPLETE
 
 **Branch:** `feat/m15-ui`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 
 ### Context for the Agent
@@ -680,11 +680,11 @@ Auto-Pilot modes are OFF / PAPER / LIVE (never a simple ON/OFF that can accident
 
 ### Human Review Checklist
 
-- [ ] UI contains zero contradictory business logic
-- [ ] All major workflows listed in the specification can be completed in the UI
-- [ ] Live mode requires explicit confirmation
-- [ ] Proof Status and warnings are clearly visible
-- [ ] The interface never implies guaranteed outcomes
+- [x] UI contains zero contradictory business logic
+- [x] All major workflows listed in the specification can be completed in the UI
+- [x] Live mode requires explicit confirmation
+- [x] Proof Status and warnings are clearly visible
+- [x] The interface never implies guaranteed outcomes
 
 ---
 
