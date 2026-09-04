@@ -611,10 +611,10 @@ After an application restart the live engine must: reconnect to the broker, quer
 
 ---
 
-### M14 – Observability & Security Hardening 🔄 IN PROGRESS
+## M14 – Observability & Security Hardening ✅ COMPLETE
 
 **Branch:** `feat/m14-observability-security`  
-**Status:** Active – agent is working here
+**Status:** Completed and reviewed
 
 ### Context for the Agent
 
@@ -639,11 +639,12 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 
 ### Human Review Checklist
 
-- [ ] Important events produce complete audit records
-- [ ] Drift states behave correctly
-- [ ] Suspension paths are tested
-- [ ] No secrets are logged or committed
-- [ ] Packages remain untrusted on import
+- [x] Important events produce complete audit records
+- [x] Drift states behave correctly
+- [x] Suspension paths are tested
+- [x] No secrets are logged or committed
+- [x] Packages remain untrusted on import
+
 
 ---
 
