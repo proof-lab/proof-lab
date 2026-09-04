@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proof Lab – Quantitative Research & Algorithmic Trading Platform</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-theme">
+  <!-- Top Application Navigation Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">&#9670;</span>
+        <span class="logo-text">PROOF LAB</span>
+      </div>
+      <span class="version-badge">v0.1.0</span>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="nav-tab active" data-tab="data-studio">Data Studio</button>
+      <button class="nav-tab" data-tab="quant-lab">Quant Laboratory</button>
+      <button class="nav-tab" data-tab="proof-engine">Proof Engine</button>
+      <button class="nav-tab" data-tab="live-dashboard">Live Dashboard</button>
+      <button class="nav-tab" data-tab="safeguards">Safeguards</button>
+      <button class="nav-tab" data-tab="copilot-pad">Co-Pilot Pad</button>
+    </nav>
+
+    <!-- Header Right Controls: Auto-Pilot Selector & System Status -->
+    <div class="header-right">
+      <div class="autopilot-control">
+        <span class="autopilot-label">Auto-Pilot:</span>
+        <div class="autopilot-buttons" id="autopilotSelector">
+          <button class="btn-pilot active" data-mode="OFF">OFF</button>
+          <button class="btn-pilot" data-mode="PAPER">PAPER</button>
+          <button class="btn-pilot btn-live" data-mode="LIVE">LIVE</button>
+        </div>
+      </div>
+      <div class="health-indicator" id="headerHealthBadge" title="System Telemetry Status">
+        <span class="status-dot healthy"></span>
+        <span class="status-text">HEALTHY</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspaces Container -->
+  <main class="app-main">
+
+    <!-- ================================================================= -->
+    <!-- 1. DATA STUDIO WORKSPACE -->
+    <!-- ================================================================= -->
+    <section id="data-studio" class="workspace-tab active">
+      <div class="workspace-header">
+        <h2>Data Studio</h2>
+        <p class="subtitle">Historical data ingestion, chronological alignment, validation, and health profiling.</p>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Ingestion & Configuration Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Extract & Validate Market Data</h3>
+          </div>
+          <form id="dataExtractForm" class="form-grid">
+            <div class="form-group">
+              <label for="dsSymbol">Symbol</label>
+              <input type="text" id="dsSymbol" value="EURUSD" required>
+            </div>
+            <div class="form-group">
+              <label for="dsBroker">Broker / Source</label>
+              <input type="text" id="dsBroker" value="MetaQuotes-Demo" required>
+            </div>
+            <div class="form-group">
+              <label for="dsTimeframe">Timeframe</label>
+              <select id="dsTimeframe">
+                <option value="M1">M1 (1 Minute)</option>
+                <option value="M5">M5 (5 Minutes)</option>
+                <option value="M15">M15 (15 Minutes)</option>
+                <option value="H1" selected>H1 (1 Hour)</option>
+                <option value="H4">H4 (4 Hours)</option>
+                <option value="D1">D1 (Daily)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dsDataSource">Feed Protocol</label>
+              <select id="dsDataSource">
+                <option value="MT5">MT5 Terminal IPC</option>
+                <option value="PARQUET">Immutable Parquet</option>
+                <option value="DUCKDB">DuckDB Storage</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dsStartDate">Start Date (UTC)</label>
+              <input type="date" id="dsStartDate" value="2023-01-01">
+            </div>
+            <div class="form-group">
+              <label for="dsEndDate">End Date (UTC)</label>
+              <input type="date" id="dsEndDate" value="2023-12-31">
+            </div>
+            <div class="form-actions full-width">
+              <button type="submit" class="btn btn-primary" id="btnExtractData">
+                Extract & Validate History
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Health Report Card -->
+        <div class="card" id="dataHealthCard">
+          <div class="card-header flex-between">
+            <h3>Dataset Health & Profiling</h3>
+            <span class="badge badge-success" id="dsHealthBadge">HEALTHY</span>
+          </div>
+          <div class="metrics-grid" id="dsMetricsGrid">
+            <div class="metric-box">
+              <span class="metric-label">Fetched Rows</span>
+              <span class="metric-val" id="dsFetched">10,000</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Retained (Clean)</span>
+              <span class="metric-val text-success" id="dsRetained">9,985</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Rejected / Corrupt</span>
+              <span class="metric-val text-danger" id="dsRejected">15</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Duplicate Rows</span>
+              <span class="metric-val" id="dsDuplicates">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Missing Gaps</span>
+              <span class="metric-val" id="dsMissingGaps">2</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Completeness</span>
+              <span class="metric-val" id="dsCompleteness">99.8%</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Median Spread</span>
+              <span class="metric-val" id="dsMedianSpread">1.2 pips</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Max Spread</span>
+              <span class="metric-val" id="dsMaxSpread">4.8 pips</span>
+            </div>
+          </div>
+          <div class="health-meta mt-3">
+            <p><strong>Time Span:</strong> <span id="dsTimeSpan">2023-01-01 to 2023-12-31</span></p>
+            <p><strong>Validation Note:</strong> <span id="dsValidationNote">All chronological timestamps timezone-aware in UTC. No future information leakage.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 2. QUANT LABORATORY WORKSPACE -->
+    <!-- ================================================================= -->
+    <section id="quant-lab" class="workspace-tab">
+      <div class="workspace-header">
+        <h2>Quant Laboratory</h2>
+        <p class="subtitle">Setup classification definition, causal feature engineering, and model training.</p>
+      </div>
+
+      <div class="grid-3col">
+        <!-- Setup Definition -->
+        <div class="card">
+          <div class="card-header">
+            <h3>1. Setup Definition</h3>
+          </div>
+          <div class="form-grid-single">
+            <div class="form-group">
+              <label for="qlInstrument">Instrument</label>
+              <input type="text" id="qlInstrument" value="EURUSD">
+            </div>
+            <div class="form-group">
+              <label for="qlDirection">Direction</label>
+              <select id="qlDirection">
+                <option value="BOTH" selected>BOTH (Long & Short)</option>
+                <option value="BUY">BUY Only</option>
+                <option value="SELL">SELL Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="qlTarget">Profit Target (Pips)</label>
+              <input type="number" id="qlTarget" value="20" min="1" step="0.5">
+            </div>
+            <div class="form-group">
+              <label for="qlStop">Stop Loss (Pips)</label>
+              <input type="number" id="qlStop" value="15" min="1" step="0.5">
+            </div>
+            <div class="form-group">
+              <label for="qlHorizon">Time Horizon (Bars)</label>
+              <input type="number" id="qlHorizon" value="12" min="1">
+            </div>
+            <div class="form-group">
+              <label for="qlLabelPolicy">Label Policy</label>
+              <select id="qlLabelPolicy">
+                <option value="FIRST_TOUCH" selected>Triple Barrier (First-Touch)</option>
+                <option value="HORIZON_CLOSE">Horizon Close Return</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature & Model Configuration -->
+        <div class="card">
+          <div class="card-header">
+            <h3>2. Features & Models</h3>
+          </div>
+          <div class="config-section">
+            <h4>Causal Feature Groups</h4>
+            <div class="checkbox-grid">
+              <label class="checkbox-label"><input type="checkbox" id="fgPrice" checked> Price / OHLC</label>
+              <label class="checkbox-label"><input type="checkbox" id="fgMomentum" checked> Momentum (RSI/MACD)</label>
+              <label class="checkbox-label"><input type="checkbox" id="fgVolatility" checked> Volatility (ATR/BB)</label>
+              <label class="checkbox-label"><input type="checkbox" id="fgTrend" checked> Trend (ADX/EMA)</label>
+              <label class="checkbox-label"><input type="checkbox" id="fgTime" checked> Time & Session</label>
+              <label class="checkbox-label"><input type="checkbox" id="fgVolume"> Volume Dynamics</label>
+              <label class="checkbox-label"><input type="checkbox" id="fgMicrostructure"> Microstructure / Spread</label>
+            </div>
+          </div>
+
+          <div class="config-section mt-3">
+            <h4>Ensemble Model Architecture</h4>
+            <div class="checkbox-grid">
+              <label class="checkbox-label"><input type="checkbox" id="modXgb" checked> XGBoost Trees</label>
+              <label class="checkbox-label"><input type="checkbox" id="modLog" checked> Logistic L2</label>
+              <label class="checkbox-label"><input type="checkbox" id="modNn" checked> Multi-Layer Neural Net</label>
+              <label class="checkbox-label"><input type="checkbox" id="modSvm"> Support Vector (RBF)</label>
+            </div>
+            <div class="form-group mt-2">
+              <label for="qlCalibration">Probability Calibration</label>
+              <select id="qlCalibration">
+                <option value="PLATT" selected>Platt Scaling (Logistic Sigmoid)</option>
+                <option value="ISOTONIC">Isotonic Regression (Non-parametric)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Training Progress & Execution -->
+        <div class="card">
+          <div class="card-header">
+            <h3>3. Training Progression</h3>
+          </div>
+          <div class="training-control">
+            <button class="btn btn-primary btn-block" id="btnTrainModel">
+              Train & Validate Model Pipeline
+            </button>
+          </div>
+          <div class="progress-container mt-3">
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar" id="trainingProgressBar" style="width: 100%;"></div>
+            </div>
+            <div class="progress-status flex-between mt-1">
+              <span id="trainingStageLabel">Status: Completed</span>
+              <span id="trainingPercentLabel">100%</span>
+            </div>
+          </div>
+          <div class="stage-pipeline mt-3" id="stagePipeline">
+            <div class="stage-step completed">1. Ingestion & Purging</div>
+            <div class="stage-step completed">2. Feature Engineering</div>
+            <div class="stage-step completed">3. Ensemble Training</div>
+            <div class="stage-step completed">4. Probability Calibration</div>
+            <div class="stage-step completed">5. Walk-Forward Validation</div>
+            <div class="stage-step completed">6. Proof Engine Robustness</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 3. PROOF ENGINE WORKSPACE -->
+    <!-- ================================================================= -->
+    <section id="proof-engine" class="workspace-tab">
+      <div class="workspace-header flex-between">
+        <div>
+          <h2>Proof Engine</h2>
+          <p class="subtitle">Chronological validation, Monte Carlo robustness, regime stress-testing, and Proof Status.</p>
+        </div>
+        <div class="proof-status-card" id="proofStatusBanner">
+          <span class="proof-badge badge-success" id="proofStatusBadge">PROOF: GREEN</span>
+          <span class="proof-summary" id="proofSummaryText">All chronological robustness and risk gates satisfied.</span>
+        </div>
+      </div>
+
+      <!-- Scorecard Grid -->
+      <div class="metrics-grid-4col mt-2">
+        <div class="metric-card">
+          <span class="metric-title">Sharpe Ratio</span>
+          <span class="metric-num text-success" id="peSharpe">1.84</span>
+          <span class="metric-sub">Annualized (Zero look-ahead)</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Profit Factor</span>
+          <span class="metric-num text-success" id="peProfitFactor">1.92</span>
+          <span class="metric-sub">Post-spread & slippage</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Win Rate</span>
+          <span class="metric-num" id="peWinRate">58.4%</span>
+          <span class="metric-sub">Calibrated edge</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Max Drawdown</span>
+          <span class="metric-num text-warning" id="peDrawdown">6.8%</span>
+          <span class="metric-sub">Peak-to-trough</span>
+        </div>
+      </div>
+
+      <div class="grid-2col mt-3">
+        <!-- Feature Importance & Regimes -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Feature Importance & Regime Sensitivity</h3>
+          </div>
+          <div class="feature-importance-list" id="peFeatureList">
+            <div class="feature-bar-item">
+              <div class="flex-between"><span>rsi_14</span><span>0.28</span></div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
+            </div>
+            <div class="feature-bar-item">
+              <div class="flex-between"><span>atr_ratio_14</span><span>0.24</span></div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 72%;"></div></div>
+            </div>
+            <div class="feature-bar-item">
+              <div class="flex-between"><span>macd_histogram</span><span>0.19</span></div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 58%;"></div></div>
+            </div>
+            <div class="feature-bar-item">
+              <div class="flex-between"><span>spread_pips</span><span>0.15</span></div>
+              <div class="bar-bg"><div class="bar-fill" style="width: 45%;"></div></div>
+            </div>
+          </div>
+          <div class="regime-table-wrapper mt-3">
+            <h4>Market Regime Stress Breakdown</h4>
+            <table class="data-table" id="peRegimeTable">
+              <thead>
+                <tr>
+                  <th>Regime</th>
+                  <th>Trades</th>
+                  <th>Win Rate</th>
+                  <th>Sharpe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Bull Trend</td><td>142</td><td>61.2%</td><td>2.10</td></tr>
+                <tr><td>Bear Trend</td><td>138</td><td>59.4%</td><td>1.95</td></tr>
+                <tr><td>High Volatility</td><td>86</td><td>52.3%</td><td>1.25</td></tr>
+                <tr><td>Low Volatility</td><td>110</td><td>62.7%</td><td>2.20</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Research Warnings & Monte Carlo -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Research Warnings & Robustness</h3>
+          </div>
+          <div class="warnings-panel" id="peWarningsPanel">
+            <div class="warning-box warning-info">
+              <strong>REGIME_VARIATION:</strong> Moderate Sharpe reduction during high-volatility news spikes. Risk engine sizing recommended.
+            </div>
+            <div class="warning-box warning-clean">
+              <strong>PURGED_HOLDOUT:</strong> Zero label leakage or look-ahead contamination detected across all walk-forward folds.
+            </div>
+          </div>
+          <div class="monte-carlo-box mt-3">
+            <h4>Monte Carlo 95% Confidence Bounds (1,000 Resamples)</h4>
+            <div class="mc-stats flex-around">
+              <div><span class="label">P5 (Worst-Case)</span><span class="val text-danger">Sharpe 1.15</span></div>
+              <div><span class="label">Median</span><span class="val">Sharpe 1.84</span></div>
+              <div><span class="label">P95 (Best-Case)</span><span class="val text-success">Sharpe 2.45</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 4. LIVE DASHBOARD WORKSPACE -->
+    <!-- ================================================================= -->
+    <section id="live-dashboard" class="workspace-tab">
+      <div class="workspace-header flex-between">
+        <div>
+          <h2>Live Dashboard</h2>
+          <p class="subtitle">Real-time market feed, calibrated AI signals, ensemble consensus, and active positions.</p>
+        </div>
+        <div class="risk-badge badge-success" id="liveRiskBadge">RISK: NORMAL</div>
+      </div>
+
+      <div class="grid-3col">
+        <!-- Live Market Feed -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Live Market Feed</h3>
+          </div>
+          <div class="live-price-box">
+            <div class="symbol-title" id="liveSymbol">EURUSD</div>
+            <div class="price-row flex-between">
+              <div><span class="p-label">Bid</span> <span class="p-val" id="liveBid">1.08520</span></div>
+              <div><span class="p-label">Ask</span> <span class="p-val" id="liveAsk">1.08532</span></div>
+            </div>
+            <div class="spread-indicator mt-2">
+              <span>Spread: <strong id="liveSpread">1.2 pips</strong></span> |
+              <span>Regime: <strong id="liveRegime">LOW_VOL_BULL</strong></span>
+            </div>
+          </div>
+          <div class="account-summary mt-3">
+            <h4>Account Status</h4>
+            <div class="acc-grid">
+              <div><span class="acc-lbl">Equity:</span> <strong id="liveEquity">$102,450.00</strong></div>
+              <div><span class="acc-lbl">Balance:</span> <strong id="liveBalance">$100,000.00</strong></div>
+              <div><span class="acc-lbl">Today P/L:</span> <strong class="text-success" id="liveDailyPnl">+$2,450.00 (+2.45%)</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Direction & Ensemble Consensus -->
+        <div class="card">
+          <div class="card-header flex-between">
+            <h3>AI Signal & Calibrated Probability</h3>
+            <span class="badge badge-success" id="aiDecisionBadge">BUY</span>
+          </div>
+          <div class="ai-signal-display">
+            <div class="prob-circle">
+              <span class="prob-value" id="aiCalibratedProb">68.5%</span>
+              <span class="prob-sub">Calibrated Win Prob</span>
+            </div>
+          </div>
+          <div class="model-votes-breakdown mt-3">
+            <h4>Ensemble Model Consensus</h4>
+            <table class="data-table" id="liveModelVotesTable">
+              <thead>
+                <tr><th>Model</th><th>Vote</th><th>Confidence</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>XGBoost Ensemble</td><td><span class="text-success">BUY</span></td><td>72.4%</td></tr>
+                <tr><td>Logistic Regression</td><td><span class="text-success">BUY</span></td><td>65.1%</td></tr>
+                <tr><td>Neural Net (MLP)</td><td><span class="text-muted">IGNORE</span></td><td>48.0%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Active Live Positions -->
+        <div class="card">
+          <div class="card-header flex-between">
+            <h3>Active Positions</h3>
+            <span class="badge" id="openPosCount">1 Open</span>
+          </div>
+          <div class="positions-list" id="livePositionsList">
+            <div class="position-item">
+              <div class="flex-between">
+                <strong>EURUSD (Long 1.0 Lots)</strong>
+                <span class="text-success">+$340.00</span>
+              </div>
+              <div class="pos-sub flex-between">
+                <span>Entry: 1.08200</span>
+                <span>TP: 1.08400 | SL: 1.08050</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 5. SAFEGUARDS WORKSPACE -->
+    <!-- ================================================================= -->
+    <section id="safeguards" class="workspace-tab">
+      <div class="workspace-header">
+        <h2>Sovereign Risk Safeguards</h2>
+        <p class="subtitle">Platform risk limits, news blackout schedules, regime governors, and emergency stop.</p>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header">
+            <h3>Risk Enforcement Thresholds</h3>
+          </div>
+          <div class="form-grid-single">
+            <div class="form-group">
+              <label for="sgMaxDailyLoss">Max Daily Loss Limit (%)</label>
+              <input type="number" id="sgMaxDailyLoss" value="3.0" step="0.5" min="0.5">
+            </div>
+            <div class="form-group">
+              <label for="sgMaxTradeRisk">Max Risk Per Trade (%)</label>
+              <input type="number" id="sgMaxTradeRisk" value="1.0" step="0.1" min="0.1">
+            </div>
+            <div class="form-group">
+              <label for="sgMaxOpenTrades">Max Concurrent Open Positions</label>
+              <input type="number" id="sgMaxOpenTrades" value="3" min="1" max="10">
+            </div>
+            <div class="checkbox-group mt-2">
+              <label class="checkbox-label"><input type="checkbox" id="sgNewsBlackout" checked> High-Impact News Blackout Window</label>
+              <label class="checkbox-label"><input type="checkbox" id="sgRegimeFilter" checked> Block Orders During Unfavorable Regimes</label>
+            </div>
+            <div class="form-actions mt-3">
+              <button class="btn btn-secondary" id="btnSaveSafeguards">Update Safeguard Limits</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3>Emergency Kill Switch</h3>
+          </div>
+          <p class="text-muted">
+            Activating the Kill Switch immediately closes all open market orders, cancels pending submissions, disarms live Auto-Pilot, and freezes all automated trading operations.
+          </p>
+          <div class="kill-switch-container mt-4 text-center">
+            <button class="btn btn-danger btn-kill-switch" id="btnKillSwitch">
+              &#9888; EMERGENCY KILL SWITCH &#9888;
+            </button>
+            <p class="mt-2 text-muted" id="killSwitchStatusText">Status: Standby (All systems nominal)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- 6. CO-PILOT TRADING PAD WORKSPACE -->
+    <!-- ================================================================= -->
+    <section id="copilot-pad" class="workspace-tab">
+      <div class="workspace-header">
+        <h2>Manual / Co-Pilot Trading Pad</h2>
+        <p class="subtitle">Trader-assisted execution with pre-trade AI probability scoring and sovereign risk vetting.</p>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Order Entry Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Manual Order Entry</h3>
+          </div>
+          <form id="copilotOrderForm" class="form-grid">
+            <div class="form-group">
+              <label for="cpSymbol">Symbol</label>
+              <input type="text" id="cpSymbol" value="EURUSD" required>
+            </div>
+            <div class="form-group">
+              <label for="cpDirection">Order Direction</label>
+              <select id="cpDirection">
+                <option value="BUY" selected>BUY (Long)</option>
+                <option value="SELL">SELL (Short)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cpVolume">Volume (Lots)</label>
+              <input type="number" id="cpVolume" value="0.10" step="0.01" min="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="cpTakeProfit">Take Profit Price (Optional)</label>
+              <input type="number" id="cpTakeProfit" value="1.08720" step="0.00001">
+            </div>
+            <div class="form-group">
+              <label for="cpStopLoss">Stop Loss Price (Optional)</label>
+              <input type="number" id="cpStopLoss" value="1.08370" step="0.00001">
+            </div>
+            <div class="form-actions full-width mt-3">
+              <button type="button" class="btn btn-primary btn-block" id="btnSubmitCopilotOrder">
+                Submit Co-Pilot Order
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- AI Pre-Trade Assessment & Disclaimer -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Pre-Trade AI Assessment</h3>
+          </div>
+          <div class="copilot-assessment-box">
+            <div class="flex-between">
+              <span>AI Model Direction:</span>
+              <strong class="text-success" id="cpAiDirection">BUY</strong>
+            </div>
+            <div class="flex-between mt-2">
+              <span>Calibrated Probability:</span>
+              <strong id="cpAiProb">68.5%</strong>
+            </div>
+            <div class="flex-between mt-2">
+              <span>Model Agreement:</span>
+              <strong>2 / 3 Models (XGBoost, Logistic)</strong>
+            </div>
+            <div class="flex-between mt-2">
+              <span>Sovereign Risk Check:</span>
+              <span class="text-success">PASSED (Risk: 0.8% < 1.0%)</span>
+            </div>
+          </div>
+
+          <!-- Anti-Overfitting Non-Guarantee Notice -->
+          <div class="disclaimer-box mt-4">
+            <span class="disclaimer-icon">&#9432;</span>
+            <div class="disclaimer-text">
+              <strong>Quant Research Notice:</strong> AI predictions represent statistical pattern classification trained on historical walk-forward distributions. Proof Lab algorithms do not guarantee trading outcomes, future performance, or positive returns.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- LIVE DEPLOYMENT CONFIRMATION MODAL -->
+  <!-- ================================================================= -->
+  <div id="liveConfirmationModal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>&#9888; Explicit Live Deployment Confirmation</h3>
+        <button class="modal-close" id="btnCloseLiveModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-warning-text">
+          You are preparing to activate <strong>LIVE Auto-Pilot</strong> trading with real capital execution.
+        </p>
+
+        <div class="modal-audit-summary">
+          <div><span>Strategy ID:</span> <strong>EURUSD_M15_PROOF_CHAMPION</strong></div>
+          <div><span>Proof Engine Status:</span> <strong class="text-success">GREEN (Validated)</strong></div>
+          <div><span>Paper Trading Track Record:</span> <strong>14 Days Verified</strong></div>
+          <div><span>Max Allowed Drawdown:</span> <strong>15.0%</strong></div>
+        </div>
+
+        <div class="modal-confirm-checkbox mt-3">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkExplicitLiveAck">
+            I explicitly confirm live execution authorization and acknowledge all trading risk.
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelLiveModal">Cancel</button>
+        <button class="btn btn-danger" id="btnConfirmLiveMode" disabled>Activate Live Trading</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

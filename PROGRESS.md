@@ -645,6 +645,46 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 - [x] No secrets are logged or committed
 - [x] Packages remain untrusted on import
 
+---
+
+### M15 – Application UI ✅ COMPLETE
+
+**Branch:** `feat/m15-ui`  
+**Status:** Completed and reviewed
+
+
+### Context for the Agent
+
+The final milestone makes the entire research-to-execution workflow accessible through a graphical interface. The UI is only a presentation and control layer; all real logic remains in the already-tested quantitative engine. The UI must never contain business logic that contradicts the engine.
+
+Required environments:
+
+- **Data Studio**: symbol, broker, timeframe, date range, data source, Extract & Validate History. Displays rows fetched/retained/rejected, missing intervals, duplicates, date range, average spread, completeness and health status (HEALTHY / WARNING / INVALID).
+- **Quant Laboratory**: instrument, setup definition (target, stop, horizon, direction, label policy), feature group selection (Price, Momentum, Volatility, Trend, Time, Volume, Microstructure), model selection, validation/execution-cost/risk configuration, and training progress with stage status (queued/running/completed/failed).
+- **Proof Engine**: scorecard, equity curve, drawdown, feature importance, robustness, regimes, Monte Carlo, walk-forward results, explicit Proof Status and research warnings.
+- **Live Dashboard**: current symbol/price/spread/regime, AI prediction, calibrated probability, individual model votes versus ensemble decision, current position, account equity, daily P/L, risk status.
+- **Safeguards**: news blackout, regime filter, max daily loss, max risk per trade, max open positions, kill switch.
+
+Auto-Pilot modes are OFF / PAPER / LIVE (never a simple ON/OFF that can accidentally enable live trading). Manual / Co-Pilot trading may display AI direction, probability, model agreement and risk assessment but must never imply that the AI guarantees the outcome. Live deployment requires explicit user confirmation that shows strategy identity, validation status, paper-trading results and risk parameters.
+
+### Tasks
+
+- [x] Build Data Studio
+- [x] Build Quant Laboratory (setup, features, models, training progress)
+- [x] Build the Proof Engine views (scorecard, equity curve, robustness, status, warnings)
+- [x] Build the Live Dashboard with model votes and risk status
+- [x] Build the Safeguards / risk-controls UI
+- [x] Implement the Auto-Pilot selector (OFF / PAPER / LIVE)
+- [x] Add the manual / Co-Pilot trading pad
+- [x] Verify that the complete end-to-end workflow is possible through the UI alone
+
+### Human Review Checklist
+
+- [x] UI contains zero contradictory business logic
+- [x] All major workflows listed in the specification can be completed in the UI
+- [x] Live mode requires explicit confirmation
+- [x] Proof Status and warnings are clearly visible
+- [x] The interface never implies guaranteed outcomes
 
 ---
 

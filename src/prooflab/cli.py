@@ -1,4 +1,4 @@
-﻿"""Proof Lab CLI entry point.
+"""Proof Lab CLI entry point.
 
 Usage::
 
@@ -82,3 +82,22 @@ def config_show() -> None:
     configure_logging(settings)
 
     typer.echo(json.dumps(settings.model_dump(), indent=2, default=str))
+
+
+# ---------------------------------------------------------------------------
+# ui command
+# ---------------------------------------------------------------------------
+
+
+@app.command("ui")
+def launch_ui(
+    host: str = typer.Option("127.0.0.1", "--host", "-h", help="Host address to bind to."),
+    port: int = typer.Option(8000, "--port", "-p", help="Port to bind to."),
+    reload: bool = typer.Option(False, "--reload", help="Enable live auto-reload."),
+) -> None:
+    """Launch the Proof Lab Graphical User Interface presentation server."""
+    import uvicorn
+
+    typer.echo(f"Starting Proof Lab UI at http://{host}:{port}/ ...")
+    uvicorn.run("prooflab.api.app:app", host=host, port=port, reload=reload)
+

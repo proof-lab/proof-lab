@@ -19,6 +19,7 @@ from prooflab.api.routers import (
     strategies_router,
     system_router,
 )
+from prooflab.ui import ui_router
 
 
 @asynccontextmanager
@@ -54,7 +55,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Register Domain Routers
+    # Register Domain Routers & UI Presentation Router
+    app.include_router(ui_router)
     app.include_router(system_router)
     app.include_router(data_router)
     app.include_router(features_router)
@@ -65,6 +67,7 @@ def create_app() -> FastAPI:
     app.include_router(live_router)
 
     return app
+
 
 
 app = create_app()
