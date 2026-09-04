@@ -567,4 +567,48 @@ Long-running operations (training, backtesting, robustness testing) must not blo
 
 ---
 
+### M13 – Live Execution + MT5 🔄 IN PROGRESS
+
+**Branch:** `feat/m13-live-mt5`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+Paper trading has proven the loop. The system now gains the ability to talk to a real broker. All broker-specific code sits behind a narrow adapter interface so additional brokers can be added later.
+
+```python
+class BrokerAdapter:
+    def get_market_data(...)
+    def get_account(...)
+    def submit_order(...)
+    def cancel_order(...)
+    def close_position(...)
+    def get_positions(...)
+```
+
+The first concrete adapter targets MetaTrader 5 (a high-fidelity mock is acceptable for testing). Different brokers have different spreads, commissions, contract sizes, minimum lots, execution behaviour, trading hours and swap; a model package should record its original broker/data context.
+
+Orders follow an explicit state machine: CREATED → SUBMITTED → ACKNOWLEDGED → FILLED / PARTIALLY_FILLED → CLOSED, plus error states REJECTED, CANCELLED, EXPIRED, FAILED. Every signal has a unique identifier; the execution layer must reject duplicate order submissions for the same signal.
+
+After an application restart the live engine must: reconnect to the broker, query actual broker positions, compare with local state, reconcile differences, restore risk state, and resume only if state is consistent. Live trading remains disabled by default. Credentials are never logged or committed.
+
+### Tasks
+
+- [ ] Define the BrokerAdapter interface
+- [ ] Implement the MT5 adapter (or a high-fidelity mock)
+- [ ] Implement the live order state machine
+- [ ] Prevent duplicate orders for the same signal
+- [ ] Implement restart recovery and position reconciliation
+- [ ] Write integration tests against the adapter using a demo or paper account only
+
+### Human Review Checklist
+
+- [ ] All broker-specific code is behind the adapter interface
+- [ ] Recovery correctly reconciles local and broker state
+- [ ] Duplicate orders are impossible
+- [ ] Live trading remains disabled by default
+- [ ] Credentials never appear in logs
+
+---
+
 _End of current work._
