@@ -599,7 +599,7 @@ After an application restart the live engine must: reconnect to the broker, quer
 - [x] Implement the live order state machine
 - [x] Prevent duplicate orders for the same signal
 - [x] Implement restart recovery and position reconciliation
-- [ ] Write integration tests against the adapter using a demo or paper account only
+- [x] Write integration tests against the adapter using a demo or paper account only
 
 ### Human Review Checklist
 
