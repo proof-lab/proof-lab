@@ -652,7 +652,6 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 **Branch:** `feat/m15-ui`  
 **Status:** Completed and reviewed
 
-
 ### Context for the Agent
 
 The final milestone makes the entire research-to-execution workflow accessible through a graphical interface. The UI is only a presentation and control layer; all real logic remains in the already-tested quantitative engine. The UI must never contain business logic that contradicts the engine.
@@ -685,6 +684,51 @@ Auto-Pilot modes are OFF / PAPER / LIVE (never a simple ON/OFF that can accident
 - [x] Live mode requires explicit confirmation
 - [x] Proof Status and warnings are clearly visible
 - [x] The interface never implies guaranteed outcomes
+
+---
+
+## M16 – Automated Release & Production CI/CD 🔄 IN PROGRESS
+
+**Branch:** `feat/m16-release-ci`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+A robust continuous delivery pipeline guarantees that tested code moving through `staging` and `production` is built, tagged, and released predictably without manual packaging errors or risk of unverified deployments.
+
+The delivery architecture separates pre-release validation from official production releases:
+
+1. **Staging Pre-Release Pipeline (`.github/workflows/prerelease.yml`)**:
+   - Triggers on `push` to the `staging` branch.
+   - Executes the full quality gate: linting (`ruff`), static typing (`mypy`), and unit/integration test suite with coverage (`pytest`).
+   - Builds distribution packages (wheel `.whl` and source distribution `.tar.gz`).
+   - Automatically publishes a GitHub **Pre-release** (e.g. `v0.1.0-rc.<run_number>`) with `prerelease: true`, changelog notes, and attached build artifacts for tester evaluation.
+
+2. **Production Release Pipeline (`.github/workflows/release.yml`)**:
+   - Triggers on `push` to the `production` branch (when the human merges verified changes from `staging`).
+   - Executes the complete quality verification suite on the production codebase.
+   - Builds production distribution packages.
+   - Automatically publishes the official **Main Release** (e.g. `v0.1.0`) with `prerelease: false`, flagged as `latest`, complete with release notes and official distribution assets.
+
+All workflow definitions must follow least-privilege token permissions (`contents: write`) and fail safely if any test, lint, or packaging step encounters an error.
+
+### Tasks
+
+- [x] Create the Staging Pre-release workflow (`.github/workflows/prerelease.yml`) triggered on push to `staging`
+- [x] Implement automated release candidate versioning (e.g. `vX.Y.Z-rc.<run_number>`) and changelog generation for staging
+- [x] Add Python package building (`python -m build`) for distribution wheels and source archives in both workflows
+- [x] Create the Production Main Release workflow (`.github/workflows/release.yml`) triggered on push to `production`
+- [x] Implement official semantic version tagging and publication of General Availability releases marked as `latest`
+- [x] Configure least-privilege GitHub Actions permissions (`contents: write`) and error fail-safes
+- [x] Write validation tests and local dry-run scripts to verify workflow syntax and release logic
+
+### Human Review Checklist
+
+- [x] Pushing to `staging` automatically runs tests, builds packages, and publishes a GitHub Pre-release (`prerelease: true`)
+- [x] Pushing to `production` automatically runs tests, builds packages, and publishes an official Main Release (`prerelease: false`, `latest`)
+- [x] Any test or build failure aborts release creation immediately
+- [x] Release artifacts (wheels and sdist tarballs) are generated and attached to releases
+- [x] Workflow permissions adhere strictly to least-privilege requirements
 
 ---
 
