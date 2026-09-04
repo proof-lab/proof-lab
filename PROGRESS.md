@@ -630,7 +630,7 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 
 ### Tasks
 
-- [ ] Implement the structured audit log for all consequential actions
+- [x] Implement the structured audit log for all consequential actions
 - [ ] Implement the system health monitor
 - [ ] Implement feature, prediction and performance drift detection
 - [ ] Implement automatic suspension rules and states
