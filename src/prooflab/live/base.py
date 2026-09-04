@@ -23,7 +23,10 @@ class BrokerCredentials(BaseModel):
     api_token: str | None = Field(default=None, repr=False)
 
     def __str__(self) -> str:
-        return f"BrokerCredentials(account_id='{self.account_id}', server='{self.server}', password='***')"
+        return (
+            f"BrokerCredentials(account_id='{self.account_id}', "
+            f"server='{self.server}', password='***')"
+        )
 
     def __repr__(self) -> str:
         return self.__str__()

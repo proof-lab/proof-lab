@@ -1,13 +1,12 @@
-"""Live execution coordinator enforcing governance, risk checks, deduplication, and broker dispatch."""
+"""Live execution coordinator enforcing governance, risk checks, and broker dispatch."""
 
 from __future__ import annotations
 
 import logging
 from datetime import UTC, datetime
-from typing import Any
 
-from prooflab.live.base import BrokerAdapter, BrokerPosition
-from prooflab.live.deduplication import DuplicateSignalError, SignalDeduplicator
+from prooflab.live.base import BrokerAdapter
+from prooflab.live.deduplication import SignalDeduplicator
 from prooflab.live.orders import LiveOrder, LiveOrderState, OrderStateMachine
 from prooflab.live.reconciliation import ReconciliationEngine, ReconciliationReport
 from prooflab.paper.lifecycle import StrategyLifecycleManager, StrategyLifecycleState
@@ -81,13 +80,13 @@ class LiveExecutionEngine:
         take_profit: float | None = None,
         current_time: datetime | None = None,
     ) -> LiveOrder:
-        """Execute signal under governance, deduplication, risk evaluation, and broker submission."""
+        """Execute signal under governance, deduplication, risk, and broker gates."""
         now = current_time or datetime.now(UTC)
 
         # 1. Gate: Live trading must be explicitly enabled
         if not self.is_live_enabled:
             raise LiveTradingDisabledError(
-                f"Live trading is disabled. Current strategy lifecycle state: '{self.lifecycle_manager.current_state}'. "
+                f"Live trading is disabled for state '{self.lifecycle_manager.current_state}'. "
                 "Explicit human approval and transition to LIVE_ENABLED is required."
             )
 
@@ -123,7 +122,11 @@ class LiveExecutionEngine:
         self._orders[order_id] = order
 
         if not risk_decision.is_approved:
-            reason = risk_decision.message or "; ".join(risk_decision.rejection_reasons) or "Risk engine rejected"
+            reason = (
+                risk_decision.message
+                or "; ".join(risk_decision.rejection_reasons)
+                or "Risk engine rejected"
+            )
             OrderStateMachine.transition(
                 order,
                 LiveOrderState.REJECTED,
@@ -134,7 +137,8 @@ class LiveExecutionEngine:
 
         # 5. Broker submission
         try:
-            executed_order = self.adapter.submit_order(order)
+            executed = self.adapter.submit_order(order)
+            executed_order = executed if isinstance(executed, LiveOrder) else order
             self._orders[order_id] = executed_order
             return executed_order
         except Exception as exc:
@@ -160,5 +164,10 @@ class LiveExecutionEngine:
         for pos in positions:
             if self.adapter.close_position(pos.position_id):
                 closed_count += 1
-        logger.info("Closed %d/%d open positions (reason: %s)", closed_count, len(positions), reason)
+        logger.info(
+            "Closed %d/%d open positions (reason: %s)",
+            closed_count,
+            len(positions),
+            reason,
+        )
         return closed_count

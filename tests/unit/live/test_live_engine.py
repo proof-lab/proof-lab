@@ -95,6 +95,7 @@ def test_live_engine_full_execution_flow() -> None:
     assert order.status == LiveOrderState.FILLED
     assert order.broker_ticket is not None
     assert len(engine.active_orders) == 1
+    assert len(engine.orders) == 1
     assert len(adapter.get_positions("EURUSD")) == 1
 
     # Duplicate signal must be rejected
@@ -107,11 +108,62 @@ def test_live_engine_full_execution_flow() -> None:
             price=1.0850,
         )
 
-    # Emergency close position
-    positions = adapter.get_positions()
-    assert len(positions) == 1
-    assert engine.close_position(positions[0].position_id)
+    # Emergency close all positions
+    closed_count = engine.close_all_positions(reason="Test close all")
+    assert closed_count == 1
     assert len(adapter.get_positions()) == 0
+
+
+def test_live_engine_risk_rejection_and_broker_error() -> None:
+    """Test risk rejection and broker exception handling."""
+    adapter = MockMT5Adapter(initial_balance=1000.0)
+    lifecycle = StrategyLifecycleManager("STRAT_M13", initial_state=StrategyLifecycleState.APPROVED)
+    lifecycle.transition_to(
+        StrategyLifecycleState.LIVE_ENABLED,
+        reason="Approved",
+        explicit_human_approval=True,
+    )
+
+    # Risk limits with very low max risk to force rejection
+    risk_engine = RiskEngine(
+        limits_config=RiskLimitsConfig(max_risk_per_trade_pct=0.0001, max_total_leverage=0.1),
+        initial_equity=1000.0,
+    )
+    kill_switch = KillSwitch()
+
+    engine = LiveExecutionEngine(
+        adapter=adapter,
+        lifecycle_manager=lifecycle,
+        risk_engine=risk_engine,
+        kill_switch=kill_switch,
+    )
+    adapter.connect()
+
+    # Signal rejected by risk engine
+    rejected_order = engine.process_signal(
+        signal_id="SIG_TOO_RISKY",
+        symbol="EURUSD",
+        side="BUY",
+        quantity=5.0,
+        price=1.0850,
+    )
+    assert rejected_order.status == LiveOrderState.REJECTED
+
+    # Disconnect adapter to force broker exception
+    adapter.disconnect()
+    risk_engine.limits_evaluator.config = RiskLimitsConfig(
+        max_risk_per_trade_pct=0.05,
+        max_symbol_leverage=50.0,
+        max_total_leverage=50.0,
+    )
+    failed_order = engine.process_signal(
+        signal_id="SIG_DISCONNECTED",
+        symbol="EURUSD",
+        side="BUY",
+        quantity=0.1,
+        price=1.0850,
+    )
+    assert failed_order.status == LiveOrderState.FAILED
 
 
 def test_live_engine_kill_switch_blocking() -> None:

@@ -42,7 +42,7 @@ def test_reconciliation_matching_positions() -> None:
     assert report.local_positions_count == 1
     assert len(report.discrepancies) == 0
     assert report.account_equity > 0
-    assert risk_engine.limits_evaluator.start_of_day_equity == report.account_equity
+    assert risk_engine.state_tracker.start_of_day_equity == report.account_equity
 
 
 def test_reconciliation_orphan_broker_position() -> None:

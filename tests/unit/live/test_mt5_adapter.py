@@ -26,6 +26,18 @@ def test_mock_mt5_connection_lifecycle() -> None:
     with pytest.raises(MT5ConnectionError):
         adapter.get_account()
 
+    with pytest.raises(MT5ConnectionError):
+        adapter.get_market_data("EURUSD", Timeframe.M1)
+
+    with pytest.raises(MT5ConnectionError):
+        adapter.get_positions()
+
+    with pytest.raises(MT5ConnectionError):
+        adapter.cancel_order("ORD_1")
+
+    with pytest.raises(MT5ConnectionError):
+        adapter.close_position("POS_1")
+
     assert adapter.connect()
     assert adapter.is_connected()
 
@@ -93,8 +105,11 @@ def test_mock_mt5_order_fill_and_position_management() -> None:
     updated_pos = adapter.get_positions("EURUSD")[0]
     assert updated_pos.unrealized_pnl > 0
 
-    # Close position
+    # Partial close position
+    assert adapter.close_position(pos.position_id, volume=0.5)
+    # Remaining close position
     assert adapter.close_position(pos.position_id)
+    assert not adapter.close_position("NON_EXISTENT_POS")
     assert len(adapter.get_positions("EURUSD")) == 0
 
     # Balance now reflects realized profit
@@ -103,10 +118,14 @@ def test_mock_mt5_order_fill_and_position_management() -> None:
     assert closed_acc.margin == 0.0
 
 
-def test_mock_mt5_simulated_rejection() -> None:
-    """Test simulated order rejection path."""
+def test_mock_mt5_simulated_rejection_and_cancel() -> None:
+    """Test simulated order rejection and order cancellation."""
     adapter = MockMT5Adapter()
     adapter.connect()
+
+    # Cancel non-existent order
+    assert not adapter.cancel_order("NON_EXISTENT_ORD")
+
     adapter.simulate_rejection = True
     adapter.rejection_reason = "Simulated: Insufficient free margin"
 
@@ -128,6 +147,10 @@ def test_mt5_adapter_import_guard() -> None:
     """Test that real MT5Adapter handles missing MetaTrader5 gracefully."""
     creds = BrokerCredentials(account_id="12345", password="pwd", server="srv")
     adapter = MT5Adapter(credentials=creds)
+
+    assert not adapter.is_connected()
+    with pytest.raises(MT5ConnectionError):
+        adapter.get_account()
 
     # In non-MT5 environment (e.g. CI / Linux / testing), connect raises clear error
     try:

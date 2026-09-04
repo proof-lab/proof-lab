@@ -40,6 +40,7 @@ class LiveOrderEvent(BaseModel):
 ALLOWED_ORDER_TRANSITIONS: dict[LiveOrderState, set[LiveOrderState]] = {
     LiveOrderState.CREATED: {
         LiveOrderState.SUBMITTED,
+        LiveOrderState.REJECTED,
         LiveOrderState.CANCELLED,
         LiveOrderState.FAILED,
     },

@@ -72,7 +72,11 @@ class MockMT5Adapter(BrokerAdapter):
 
     def connect(self) -> bool:
         """Simulate connecting to MetaTrader 5 terminal."""
-        logger.info("Connecting to MT5 broker at server=%s (account=%s)", self.credentials.server, self.credentials.account_id)
+        logger.info(
+            "Connecting to MT5 server=%s (account=%s)",
+            self.credentials.server,
+            self.credentials.account_id,
+        )
         self._connected = True
         return True
 
@@ -102,7 +106,9 @@ class MockMT5Adapter(BrokerAdapter):
             raise MT5ConnectionError("MT5 terminal is not connected.")
 
         total_unrealized = sum(p.unrealized_pnl for p in self._positions.values())
-        total_margin = sum((p.open_price * p.volume * 100000.0) / self.leverage for p in self._positions.values())
+        total_margin = sum(
+            (p.open_price * p.volume * 100000.0) / self.leverage for p in self._positions.values()
+        )
         equity = self.balance + total_unrealized
         free_margin = max(0.0, equity - total_margin)
         margin_level = (equity / total_margin * 100.0) if total_margin > 0 else None
@@ -167,10 +173,14 @@ class MockMT5Adapter(BrokerAdapter):
             raise MT5ConnectionError("Cannot submit order: MT5 terminal is not connected.")
 
         # Progress to SUBMITTED
-        OrderStateMachine.transition(order, LiveOrderState.SUBMITTED, reason="Dispatched to Mock MT5 engine")
+        OrderStateMachine.transition(
+            order, LiveOrderState.SUBMITTED, reason="Dispatched to Mock MT5 engine"
+        )
 
         if self.simulate_rejection:
-            OrderStateMachine.transition(order, LiveOrderState.REJECTED, reason=self.rejection_reason)
+            OrderStateMachine.transition(
+                order, LiveOrderState.REJECTED, reason=self.rejection_reason
+            )
             self._orders[order.order_id] = order
             return order
 
@@ -194,7 +204,7 @@ class MockMT5Adapter(BrokerAdapter):
         else:
             fill_price = current_market - half_spread - slippage_val
 
-        commission = round(3.50 * order.quantity, 2)  # $3.50 per lot round-turn commission
+        commission = round(3.50 * order.quantity, 2)
 
         OrderStateMachine.transition(
             order,
@@ -248,7 +258,9 @@ class MockMT5Adapter(BrokerAdapter):
         if not order or not order.is_active:
             return False
 
-        OrderStateMachine.transition(order, LiveOrderState.CANCELLED, reason="User cancelled order")
+        OrderStateMachine.transition(
+            order, LiveOrderState.CANCELLED, reason="User cancelled order"
+        )
         return True
 
     def close_position(self, position_id: str, volume: float | None = None) -> bool:
@@ -272,15 +284,26 @@ class MockMT5Adapter(BrokerAdapter):
             pnl = (pos.open_price - close_price) * close_vol * 100000.0
 
         self.balance += pnl
-        del self._positions[position_id]
+        if close_vol < pos.volume:
+            self._positions[position_id] = pos.model_copy(
+                update={"volume": round(pos.volume - close_vol, 5)}
+            )
+        else:
+            del self._positions[position_id]
+            # Update matching order to CLOSED if found
+            for order in self._orders.values():
+                if order.broker_ticket and f"POS_{order.broker_ticket}" == position_id:
+                    if order.status == LiveOrderState.FILLED:
+                        OrderStateMachine.transition(
+                            order, LiveOrderState.CLOSED, reason="Position closed on broker"
+                        )
 
-        # Update matching order to CLOSED if found
-        for order in self._orders.values():
-            if order.broker_ticket and f"POS_{order.broker_ticket}" == position_id:
-                if order.status == LiveOrderState.FILLED:
-                    OrderStateMachine.transition(order, LiveOrderState.CLOSED, reason="Position closed on broker")
-
-        logger.info("Closed mock MT5 position %s: realized_pnl=%.2f, new_balance=%.2f", position_id, pnl, self.balance)
+        logger.info(
+            "Closed mock MT5 position %s: realized_pnl=%.2f, new_balance=%.2f",
+            position_id,
+            pnl,
+            self.balance,
+        )
         return True
 
     def get_positions(self, symbol: str | None = None) -> list[BrokerPosition]:
@@ -317,16 +340,19 @@ class MT5Adapter(BrokerAdapter):
     def connect(self) -> bool:
         """Initialize MetaTrader 5 API connection."""
         try:
-            import MetaTrader5 as mt5  # type: ignore[import-untyped]
+            import MetaTrader5 as mt5_module  # noqa: N813
 
-            self._mt5 = mt5
+            self._mt5 = mt5_module
         except ImportError:
             raise RuntimeError(
-                "MetaTrader5 package is not installed. Use MockMT5Adapter or install MetaTrader5 on Windows."
+                "MetaTrader5 package is not installed. Use MockMT5Adapter or install MetaTrader5."
             )
 
-        # Connect without leaking password in logs
-        logger.info("Initializing MetaTrader 5 connection to server=%s, account=%s", self.credentials.server, self.credentials.account_id)
+        logger.info(
+            "Connecting to MT5 server=%s, account=%s",
+            self.credentials.server,
+            self.credentials.account_id,
+        )
         if not self._mt5.initialize(
             login=int(self.credentials.account_id),
             password=self.credentials.password,
@@ -391,12 +417,25 @@ class MT5Adapter(BrokerAdapter):
         df["timeframe"] = timeframe.value
         df["source"] = "MT5"
         df["volume"] = df["real_volume"].astype(float)
-        return df[["timestamp", "symbol", "timeframe", "open", "high", "low", "close", "volume", "tick_volume", "spread", "source"]]
+        return df[
+            [
+                "timestamp",
+                "symbol",
+                "timeframe",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "tick_volume",
+                "spread",
+                "source",
+            ]
+        ]
 
     def submit_order(self, order: LiveOrder) -> LiveOrder:
         if not self._connected or not self._mt5:
             raise MT5ConnectionError("MT5 is not connected.")
-        # Production MT5 order dispatch implementation
         return order
 
     def cancel_order(self, order_id: str) -> bool:

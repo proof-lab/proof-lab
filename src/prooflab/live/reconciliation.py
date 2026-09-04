@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -67,27 +66,23 @@ class ReconciliationEngine:
         local_orders: list[LiveOrder] | dict[str, LiveOrder],
         risk_engine: RiskEngine | None = None,
     ) -> ReconciliationReport:
-        """Query broker, compare with local active orders, restore risk state, and produce report."""
+        """Query broker, compare with local active orders, and restore risk state."""
         if not adapter.is_connected():
             raise RuntimeError("BrokerAdapter must be connected prior to reconciliation.")
 
         broker_positions = adapter.get_positions()
         account_info = adapter.get_account()
 
-        orders_list = list(local_orders.values()) if isinstance(local_orders, dict) else list(local_orders)
+        orders_list = (
+            list(local_orders.values()) if isinstance(local_orders, dict) else list(local_orders)
+        )
         active_local_orders = [o for o in orders_list if o.status == LiveOrderState.FILLED]
 
-        broker_pos_by_id: dict[str, BrokerPosition] = {p.position_id: p for p in broker_positions}
-        # Also index by ticket if position_id is formatted as POS_<ticket>
+        # Index broker positions by ticket if position_id is formatted as POS_<ticket>
         broker_pos_by_ticket: dict[int, BrokerPosition] = {}
         for p in broker_positions:
             if p.position_id.startswith("POS_") and p.position_id[4:].isdigit():
                 broker_pos_by_ticket[int(p.position_id[4:])] = p
-
-        local_by_ticket: dict[int, LiveOrder] = {}
-        for o in active_local_orders:
-            if o.broker_ticket is not None:
-                local_by_ticket[o.broker_ticket] = o
 
         discrepancies: list[PositionDiscrepancy] = []
         matched_tickets: set[int] = set()
@@ -103,7 +98,10 @@ class ReconciliationEngine:
                         discrepancy_type=DiscrepancyType.MISSING_BROKER_POSITION,
                         local_volume=order.filled_quantity or order.quantity,
                         local_side=order.side,
-                        description=f"Local active order {order.order_id} (ticket {ticket}) is no longer open on broker.",
+                        description=(
+                            f"Local active order {order.order_id} (ticket {ticket}) "
+                            "is no longer open on broker."
+                        ),
                     )
                 )
             else:
@@ -120,7 +118,10 @@ class ReconciliationEngine:
                             discrepancy_type=DiscrepancyType.VOLUME_MISMATCH,
                             broker_volume=broker_pos.volume,
                             local_volume=local_vol,
-                            description=f"Volume mismatch on ticket {ticket}: broker={broker_pos.volume}, local={local_vol}",
+                            description=(
+                                f"Volume mismatch on ticket {ticket}: "
+                                f"broker={broker_pos.volume}, local={local_vol}"
+                            ),
                         )
                     )
                 if broker_pos.side != order.side:
@@ -131,7 +132,10 @@ class ReconciliationEngine:
                             discrepancy_type=DiscrepancyType.SIDE_MISMATCH,
                             broker_side=broker_pos.side,
                             local_side=order.side,
-                            description=f"Side mismatch on ticket {ticket}: broker={broker_pos.side}, local={order.side}",
+                            description=(
+                                f"Side mismatch on ticket {ticket}: "
+                                f"broker={broker_pos.side}, local={order.side}"
+                            ),
                         )
                     )
 
@@ -149,7 +153,10 @@ class ReconciliationEngine:
                         discrepancy_type=DiscrepancyType.ORPHAN_BROKER_POSITION,
                         broker_volume=p.volume,
                         broker_side=p.side,
-                        description=f"Orphan position {p.position_id} on broker has no corresponding local active order.",
+                        description=(
+                            f"Orphan position {p.position_id} on broker has "
+                            "no corresponding local active order."
+                        ),
                     )
                 )
 
@@ -159,8 +166,8 @@ class ReconciliationEngine:
         # 3. Restore risk state if risk engine provided
         if risk_engine is not None:
             # Sync start of day baseline and current exposure
-            risk_engine.limits_evaluator.start_of_day_equity = account_info.equity
-            risk_engine.limits_evaluator.start_of_week_equity = account_info.equity
+            risk_engine.state_tracker.start_of_day_equity = account_info.equity
+            risk_engine.state_tracker.start_of_week_equity = account_info.equity
             risk_engine.state_tracker.current_equity = account_info.equity
             # Sync open position records to risk state tracker
             open_records = [
@@ -175,17 +182,18 @@ class ReconciliationEngine:
             ]
             risk_engine.sync_open_positions(open_records)
             logger.info(
-                "Restored risk engine state: equity=%.2f, balance=%.2f, open_positions=%d, exposure=%.2f",
+                "Restored risk engine state: equity=%.2f, balance=%.2f, "
+                "open_positions=%d, exposure=%.2f",
                 account_info.equity,
                 account_info.balance,
                 len(broker_positions),
                 total_exposure,
             )
 
+        status_text = "PASSED (Consistent)" if is_consistent else "FAILED (Discrepancies found)"
         summary = (
-            f"Reconciliation {'PASSED (Consistent)' if is_consistent else 'FAILED (Discrepancies found)'}: "
-            f"{len(broker_positions)} broker positions, {len(active_local_orders)} local active orders, "
-            f"{len(discrepancies)} discrepancies."
+            f"Reconciliation {status_text}: {len(broker_positions)} broker positions, "
+            f"{len(active_local_orders)} local active orders, {len(discrepancies)} discrepancies."
         )
 
         logger.info(summary)

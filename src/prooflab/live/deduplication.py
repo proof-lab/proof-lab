@@ -50,7 +50,7 @@ class SignalDeduplicator:
         if signal_id in self._processed:
             existing = self._processed[signal_id]
             logger.warning(
-                "Duplicate signal submission rejected: signal_id=%s already executed as order_id=%s at %s",
+                "Duplicate signal rejected: signal_id=%s already executed as order_id=%s at %s",
                 signal_id,
                 existing.order_id,
                 existing.timestamp_utc,

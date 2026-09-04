@@ -13,7 +13,7 @@ from prooflab.live.orders import (
 
 
 def test_happy_path_order_lifecycle() -> None:
-    """Test standard order transition path: CREATED -> SUBMITTED -> ACKNOWLEDGED -> FILLED -> CLOSED."""
+    """Test standard order transition path from CREATED to CLOSED."""
     order = LiveOrder(
         order_id="ORD_001",
         signal_id="SIG_001",
@@ -31,13 +31,15 @@ def test_happy_path_order_lifecycle() -> None:
     assert not order.is_terminal
 
     # 1. Transition to SUBMITTED
-    ev1 = OrderStateMachine.transition(order, LiveOrderState.SUBMITTED, reason="Dispatched to MT5 broker")
+    ev1 = OrderStateMachine.transition(
+        order, LiveOrderState.SUBMITTED, reason="Dispatched to MT5 broker"
+    )
     assert order.status == LiveOrderState.SUBMITTED
     assert ev1.from_state == LiveOrderState.CREATED
     assert ev1.to_state == LiveOrderState.SUBMITTED
 
     # 2. Transition to ACKNOWLEDGED
-    ev2 = OrderStateMachine.transition(
+    OrderStateMachine.transition(
         order,
         LiveOrderState.ACKNOWLEDGED,
         reason="Broker received and acknowledged order",
@@ -47,7 +49,7 @@ def test_happy_path_order_lifecycle() -> None:
     assert order.broker_ticket == 12345678
 
     # 3. Transition to FILLED
-    ev3 = OrderStateMachine.transition(
+    OrderStateMachine.transition(
         order,
         LiveOrderState.FILLED,
         reason="Order fully executed by broker",
@@ -63,7 +65,9 @@ def test_happy_path_order_lifecycle() -> None:
     assert order.is_active
 
     # 4. Transition to CLOSED
-    ev4 = OrderStateMachine.transition(order, LiveOrderState.CLOSED, reason="Position closed on TP target")
+    OrderStateMachine.transition(
+        order, LiveOrderState.CLOSED, reason="Position closed on TP target"
+    )
     assert order.status == LiveOrderState.CLOSED
     assert order.is_terminal
     assert not order.is_active
@@ -83,14 +87,18 @@ def test_rejection_and_terminal_paths() -> None:
     )
 
     OrderStateMachine.transition(order, LiveOrderState.SUBMITTED, reason="Sent to broker")
-    OrderStateMachine.transition(order, LiveOrderState.REJECTED, reason="Broker rejected: Insufficient margin")
+    OrderStateMachine.transition(
+        order, LiveOrderState.REJECTED, reason="Broker rejected: Insufficient margin"
+    )
 
     assert order.status == LiveOrderState.REJECTED
     assert order.is_terminal
 
     # Attempting to transition from terminal REJECTED state must fail
     with pytest.raises(InvalidOrderStateTransitionError):
-        OrderStateMachine.transition(order, LiveOrderState.FILLED, reason="Illegal fill after reject")
+        OrderStateMachine.transition(
+            order, LiveOrderState.FILLED, reason="Illegal fill after reject"
+        )
 
 
 def test_partial_fill_path() -> None:
@@ -105,7 +113,9 @@ def test_partial_fill_path() -> None:
     )
 
     OrderStateMachine.transition(order, LiveOrderState.SUBMITTED, reason="Sent")
-    OrderStateMachine.transition(order, LiveOrderState.ACKNOWLEDGED, reason="Acked", broker_ticket=999)
+    OrderStateMachine.transition(
+        order, LiveOrderState.ACKNOWLEDGED, reason="Acked", broker_ticket=999
+    )
     OrderStateMachine.transition(
         order,
         LiveOrderState.PARTIALLY_FILLED,
