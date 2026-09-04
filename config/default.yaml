@@ -1,0 +1,22 @@
+﻿# Proof Lab – default configuration
+# All keys defined here are the fallback values for every environment.
+# Override specific keys in development.yaml / testing.yaml / production.yaml.
+
+env: development
+
+log:
+  level: INFO
+  format: text       # text | json
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  cache_dir: data/cache
+
+db:
+  url: "duckdb:///data/prooflab.duckdb"
+
+# Safety gate – never enable live trading by default.
+# This value MUST remain false. An explicit programmatic gate is required
+# to transition from paper trading to live trading.
+live_trading_enabled: false

@@ -1,0 +1,6 @@
+﻿# Development environment overrides
+env: development
+
+log:
+  level: DEBUG
+  format: text

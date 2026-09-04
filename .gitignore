@@ -1,1 +1,74 @@
-*.log
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+.installed.cfg
+pip-wheel-metadata/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+*.env
+
+# Secrets – NEVER commit
+.env
+.env.*
+!.env.example
+
+# Test & coverage artefacts
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.lcov
+
+# Mypy / type stubs
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data – raw / processed data is NOT tracked in Git
+data/raw/
+data/processed/
+data/cache/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/cache/.gitkeep
+
+# Artefacts – model files, reports etc. are NOT tracked in Git
+artifacts/models/
+artifacts/experiments/
+artifacts/reports/
+!artifacts/models/.gitkeep
+!artifacts/experiments/.gitkeep
+!artifacts/reports/.gitkeep
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# Trash
+trash/

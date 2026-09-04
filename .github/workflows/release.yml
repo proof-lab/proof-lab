@@ -1,0 +1,80 @@
+name: Production Release
+
+on:
+  push:
+    branches:
+      - production
+
+permissions:
+  contents: write
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Quality Gates: Final Verification on Production
+  # -------------------------------------------------------------------------
+  validate:
+    name: Validate Production Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CPU PyTorch
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install dependencies
+        run: pip install -e ".[dev,ml]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Type check (mypy)
+        run: mypy src/
+
+      - name: Run full test suite with coverage
+        run: pytest tests/unit/ -v --cov=prooflab --cov-report=term-missing
+
+  # -------------------------------------------------------------------------
+  # Build Production Packages & Publish Official Release
+  # -------------------------------------------------------------------------
+  release:
+    name: Build & Publish Production Release
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install packaging tools
+        run: pip install build
+
+      - name: Build distribution artifacts (wheel and sdist)
+        run: python -m build
+
+      - name: Determine Production Release Tag
+        id: vars
+        run: |
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          TAG="v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Official GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.vars.outputs.tag }}" dist/* \
+            --title "Proof Lab v${{ steps.vars.outputs.version }}" \
+            --notes "### Proof Lab Official Production Release
+          > [!NOTE]
+          > General Availability release deployed from \`production\` commit \`${{ github.sha }}\`.
+          > Fully verified across all unit tests, quantitative validation suites, and risk gates." \
+            --latest

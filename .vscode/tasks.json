@@ -1,0 +1,176 @@
+{
+  "options": {
+    "env": {
+      "COMMITS_LOG_PATH": "trash/commits.log",
+      "DIFF_LOG_PATH": "trash/diff.log"
+    }
+  },
+  "tasks": [
+    {
+      "command": "git diff --cached > $DIFF_LOG_PATH",
+      "detail": "Saves the staged diff to $DIFF_LOG_PATH.",
+      "label": "git > diff > staged > save",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git fetch --all",
+      "detail": "Fetches all remotes and branches without merging.",
+      "label": "git > fetch > all",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git commit --allow-empty -m 'chore(`/`): empty commit'",
+      "detail": "Creates an empty commit for workflow or CI/CD triggers.",
+      "label": "git > commit > empty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log staging..development --pretty=format:\"%s%n%b%n_%n\" > $COMMITS_LOG_PATH",
+      "detail": "Saves the staging..development commit log to $COMMITS_LOG_PATH in pretty format.",
+      "label": "git > log > staging..development > pretty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log staging..development --oneline > $COMMITS_LOG_PATH",
+      "detail": "Saves the staging..development commit log to $COMMITS_LOG_PATH in one-line format.",
+      "label": "git > log > staging..development > oneline",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log staging..production --pretty=format:\"%s%n%b%n_%n\" > $COMMITS_LOG_PATH",
+      "detail": "Saves the staging..production commit log to $COMMITS_LOG_PATH in pretty format.",
+      "label": "git > log > staging..production > pretty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log staging..production --oneline > $COMMITS_LOG_PATH",
+      "detail": "Saves the staging..production commit log to $COMMITS_LOG_PATH in one-line format.",
+      "label": "git > log > staging..production > oneline",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log production..staging --pretty=format:\"%s%n%b%n_%n\" > $COMMITS_LOG_PATH",
+      "detail": "Saves the production..staging commit log to $COMMITS_LOG_PATH in pretty format.",
+      "label": "git > log > production..staging > pretty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log production..staging --oneline > $COMMITS_LOG_PATH",
+      "detail": "Saves the production..staging commit log to $COMMITS_LOG_PATH in one-line format.",
+      "label": "git > log > production..staging > oneline",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log development..production --pretty=format:\"%s%n%b%n_%n\" > $COMMITS_LOG_PATH",
+      "detail": "Saves the development..production commit log to $COMMITS_LOG_PATH in pretty format.",
+      "label": "git > log > development..production > pretty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log development..production --oneline > $COMMITS_LOG_PATH",
+      "detail": "Saves the development..production commit log to $COMMITS_LOG_PATH in one-line format.",
+      "label": "git > log > development..production > oneline",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log development..staging --pretty=format:\"%s%n%b%n_%n\" > $COMMITS_LOG_PATH",
+      "detail": "Saves the development..staging commit log to $COMMITS_LOG_PATH in pretty format.",
+      "label": "git > log > development..staging > pretty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log development..staging --oneline > $COMMITS_LOG_PATH",
+      "detail": "Saves the development..staging commit log to $COMMITS_LOG_PATH in one-line format.",
+      "label": "git > log > development..staging > oneline",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log production..development --pretty=format:\"%s%n%b%n_%n\" > $COMMITS_LOG_PATH",
+      "detail": "Saves the production..development commit log to $COMMITS_LOG_PATH in pretty format.",
+      "label": "git > log > production..development > pretty",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "git log production..development --oneline > $COMMITS_LOG_PATH",
+      "detail": "Saves the production..development commit log to $COMMITS_LOG_PATH in one-line format.",
+      "label": "git > log > production..development > oneline",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    }
+  ],
+  "version": "2.0.0"
+}

@@ -103,3 +103,36 @@ Live trading remains disabled by default.
 ## License
 
 See `LICENSE`.
+
+---
+
+## Getting Started
+
+### 1. Install
+
+```bash
+pip install -e .          # core platform
+pip install -e ".[dev]"   # + linting, type-checking, testing
+pip install -e ".[ml]"    # + heavy ML stack (scipy, sklearn, xgboost, torch, optuna)
+```
+
+### 2. Configure
+
+```bash
+cp .env.example .env
+# Edit .env to match your environment
+```
+
+### 3. Verify the CLI
+
+```bash
+prooflab --version
+prooflab --help
+prooflab config show
+```
+
+### 4. Run tests
+
+```bash
+pytest tests/unit/ -v
+```
