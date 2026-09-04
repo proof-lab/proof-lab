@@ -7,6 +7,11 @@ from prooflab.live.base import (
     BrokerCredentials,
     BrokerPosition,
 )
+from prooflab.live.mt5_adapter import (
+    MockMT5Adapter,
+    MT5Adapter,
+    MT5ConnectionError,
+)
 from prooflab.live.orders import (
     ALLOWED_ORDER_TRANSITIONS,
     InvalidOrderStateTransitionError,
@@ -27,5 +32,8 @@ __all__ = [
     "LiveOrder",
     "LiveOrderEvent",
     "LiveOrderState",
+    "MT5Adapter",
+    "MT5ConnectionError",
+    "MockMT5Adapter",
     "OrderStateMachine",
 ]
