@@ -633,7 +633,7 @@ Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment var
 - [x] Implement the structured audit log for all consequential actions
 - [x] Implement the system health monitor
 - [x] Implement feature, prediction and performance drift detection
-- [ ] Implement automatic suspension rules and states
+- [x] Implement automatic suspension rules and states
 - [ ] Harden secrets handling
 - [ ] Perform a final security review of package import and API endpoints
 
