@@ -13,6 +13,7 @@ authors = [{ name = "Proof Lab" }]
 
 dependencies = [
     "numpy>=1.26",
+    "scipy>=1.11",
     "pandas>=2.1",
     "joblib>=1.3",
     "pyarrow>=14.0",
@@ -31,12 +32,12 @@ dependencies = [
 
 [project.optional-dependencies]
 ml = [
-    "scipy>=1.11",
     "scikit-learn>=1.4",
     "xgboost>=2.0",
     "torch>=2.2",
     "optuna>=3.5",
 ]
+
 dev = [
     "ruff>=0.4",
     "mypy>=1.10",

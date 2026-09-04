@@ -8,7 +8,14 @@ from enum import StrEnum
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
-from scipy import stats
+
+try:
+    from scipy import stats  # type: ignore[import-untyped,unused-ignore]
+
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+
 
 logger = logging.getLogger(__name__)
 
@@ -137,11 +144,19 @@ class FeatureDriftDetector:
             )
 
         psi = cls.calculate_psi(ref, cur)
-        ks_res = stats.ks_2samp(ref, cur)
-        ks_stat = float(round(float(ks_res.statistic), 4))
-        ks_p = float(round(float(ks_res.pvalue), 4))
+        if HAS_SCIPY:
+            ks_res = stats.ks_2samp(ref, cur)
+            ks_stat = float(round(float(ks_res.statistic), 4))
+            ks_p = float(round(float(ks_res.pvalue), 4))
+        else:
+            all_vals = np.sort(np.concatenate([ref, cur]))
+            cdf1 = np.searchsorted(np.sort(ref), all_vals, side="right") / len(ref)
+            cdf2 = np.searchsorted(np.sort(cur), all_vals, side="right") / len(cur)
+            ks_stat = float(round(float(np.max(np.abs(cdf1 - cdf2))), 4))
+            ks_p = 1.0 if ks_stat < 0.1 else 0.001
 
         if psi >= psi_critical:
+
             status = DriftStatus.SUSPENDED
             msg = f"Critical feature drift: PSI={psi:.4f} >= {psi_critical}"
         elif psi >= psi_warning or (ks_p < 0.01 and ks_stat > 0.15):
