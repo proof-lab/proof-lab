@@ -6,10 +6,20 @@ from prooflab.monitoring.audit import (
     AuditRecord,
     AuditSeverity,
 )
+from prooflab.monitoring.health import (
+    ComponentHealth,
+    ComponentStatus,
+    HealthMonitor,
+    SystemHealthReport,
+)
 
 __all__ = [
     "AuditEventType",
     "AuditLogger",
     "AuditRecord",
     "AuditSeverity",
+    "ComponentHealth",
+    "ComponentStatus",
+    "HealthMonitor",
+    "SystemHealthReport",
 ]
