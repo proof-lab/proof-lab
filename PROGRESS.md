@@ -611,4 +611,40 @@ After an application restart the live engine must: reconnect to the broker, quer
 
 ---
 
+### M14 – Observability & Security Hardening 🔄 IN PROGRESS
+
+**Branch:** `feat/m14-observability-security`  
+**Status:** Active – agent is working here
+
+### Context for the Agent
+
+A live system must be observable and must fail safely. Every consequential action is written to a structured audit log (model trained/approved/imported/deployed, signal generated/rejected, order submitted/filled/closed, risk limit triggered, kill switch activated, news blackout, model suspended, etc.). Each record contains timestamp, event_type, severity, user/system, strategy_id, symbol and metadata.
+
+A health monitor tracks data feed, database, model, feature engine, risk engine, broker, news provider and application, each reporting HEALTHY / DEGRADED / FAILED.
+
+The system monitors feature drift (current feature distributions versus training), prediction drift (BUY/SELL/IGNORE percentages and confidence distribution) and performance drift (win rate, expectancy, profit factor, drawdown). Possible states are NORMAL, WARNING and SUSPENDED. Automatic suspension occurs on configurable conditions (daily loss, drawdown, drift, data/broker failure, excessive spread, prediction or execution anomalies).
+
+Automatic retraining must never mean automatic redeployment. The process is: detect drift → generate candidate → train → validate → blind test → compare against production → human approval → deploy. A Champion/Challenger pattern is supported; the challenger never trades real money until approved.
+
+Secrets (MT5 credentials, API keys, database URLs, etc.) stay in environment variables or a secure store and are never logged or committed. Imported `.plb` packages continue to be treated as untrusted. Final security review of the import path and API endpoints is required.
+
+### Tasks
+
+- [ ] Implement the structured audit log for all consequential actions
+- [ ] Implement the system health monitor
+- [ ] Implement feature, prediction and performance drift detection
+- [ ] Implement automatic suspension rules and states
+- [ ] Harden secrets handling
+- [ ] Perform a final security review of package import and API endpoints
+
+### Human Review Checklist
+
+- [ ] Important events produce complete audit records
+- [ ] Drift states behave correctly
+- [ ] Suspension paths are tested
+- [ ] No secrets are logged or committed
+- [ ] Packages remain untrusted on import
+
+---
+
 _End of current work._
