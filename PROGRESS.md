@@ -724,11 +724,11 @@ All workflow definitions must follow least-privilege token permissions (`content
 
 ### Human Review Checklist
 
-- [ ] Pushing to `staging` automatically runs tests, builds packages, and publishes a GitHub Pre-release (`prerelease: true`)
-- [ ] Pushing to `production` automatically runs tests, builds packages, and publishes an official Main Release (`prerelease: false`, `latest`)
-- [ ] Any test or build failure aborts release creation immediately
-- [ ] Release artifacts (wheels and sdist tarballs) are generated and attached to releases
-- [ ] Workflow permissions adhere strictly to least-privilege requirements
+- [x] Pushing to `staging` automatically runs tests, builds packages, and publishes a GitHub Pre-release (`prerelease: true`)
+- [x] Pushing to `production` automatically runs tests, builds packages, and publishes an official Main Release (`prerelease: false`, `latest`)
+- [x] Any test or build failure aborts release creation immediately
+- [x] Release artifacts (wheels and sdist tarballs) are generated and attached to releases
+- [x] Workflow permissions adhere strictly to least-privilege requirements
 
 ---
 
