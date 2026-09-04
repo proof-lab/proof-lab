@@ -25,6 +25,12 @@ from prooflab.live.orders import (
     LiveOrderState,
     OrderStateMachine,
 )
+from prooflab.live.reconciliation import (
+    DiscrepancyType,
+    PositionDiscrepancy,
+    ReconciliationEngine,
+    ReconciliationReport,
+)
 
 __all__ = [
     "ALLOWED_ORDER_TRANSITIONS",
@@ -33,6 +39,7 @@ __all__ = [
     "BrokerContextInfo",
     "BrokerCredentials",
     "BrokerPosition",
+    "DiscrepancyType",
     "DuplicateSignalError",
     "InvalidOrderStateTransitionError",
     "LiveOrder",
@@ -42,6 +49,9 @@ __all__ = [
     "MT5ConnectionError",
     "MockMT5Adapter",
     "OrderStateMachine",
+    "PositionDiscrepancy",
     "ProcessedSignalRecord",
+    "ReconciliationEngine",
+    "ReconciliationReport",
     "SignalDeduplicator",
 ]
